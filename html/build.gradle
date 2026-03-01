@@ -71,10 +71,22 @@ task dist(dependsOn: [compileGwt]) {
                 def path = f.absolutePath.substring(assetsFolder.absolutePath.length() + 1).replace('\\', '/')
                 def ext = f.name.lastIndexOf(".") >= 0 ? f.name.substring(f.name.lastIndexOf(".") + 1).toLowerCase() : ""
                 def type = "b" // binary
-                if (["png", "jpg", "jpeg", "gif", "bmp"].contains(ext)) type = "i"
-                else if (["mp3", "ogg", "wav", "m4a"].contains(ext)) type = "a"
-                else if (["glsl", "fnt", "pack", "obj", "mtl", "txt", "xml", "json", "atlas", "csv"].contains(ext)) type = "t"
-                file.append(type + ":" + path + ":" + f.length() + "\n")
+                def mime = "application/octet-stream"
+                if (["png", "jpg", "jpeg", "gif", "bmp"].contains(ext)) {
+                    type = "i"
+                    mime = "image/" + (ext == "jpg" ? "jpeg" : ext)
+                }
+                else if (["mp3", "ogg", "wav", "m4a"].contains(ext)) {
+                    type = "a"
+                    if (ext == "mp3") mime = "audio/mpeg"
+                    else mime = "audio/" + ext
+                }
+                else if (["glsl", "fnt", "pack", "obj", "mtl", "txt", "xml", "json", "atlas", "csv"].contains(ext)) {
+                    type = "t"
+                    mime = "text/plain"
+                }
+
+                file.append(type + ":" + path + ":" + f.length() + ":" + mime + "\n")
             }
         }
     }
