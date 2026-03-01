@@ -1,1 +1,1 @@
-t:dummy.txt:136
+t:dummy.txt:136:text/plain
