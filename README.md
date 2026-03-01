@@ -2,6 +2,10 @@
 
 ### Modern Java Boids Simulation --- Desktop + Web
 
+<div align="center">
+  <img src="images/banner.png" alt="Flock Lab Boids Simulation" width="100%">
+</div>
+
 ![Java](https://img.shields.io/badge/Java-21-blue?style=for-the-badge&logo=openjdk&logoColor=white)
 ![LibGDX](https://img.shields.io/badge/LibGDX-Latest-red?style=for-the-badge)
 ![Gradle](https://img.shields.io/badge/Gradle-8.x-02303A?style=for-the-badge&logo=gradle&logoColor=white)
