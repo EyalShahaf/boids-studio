@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ "main" ]
 
+# Grant GITHUB_TOKEN write access to push to gh-pages branch
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
