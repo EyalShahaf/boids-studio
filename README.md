@@ -8,6 +8,7 @@
 
 ![Java](https://img.shields.io/badge/Java-21-blue?style=for-the-badge&logo=openjdk&logoColor=white)
 ![LibGDX](https://img.shields.io/badge/LibGDX-Latest-red?style=for-the-badge)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Play_Now-green?style=for-the-badge&logo=google-chrome&logoColor=white)](https://eyalshahaf.github.io/boids-studio/)
 ![Gradle](https://img.shields.io/badge/Gradle-8.x-02303A?style=for-the-badge&logo=gradle&logoColor=white)
 ![Platform](https://img.shields.io/badge/platform-Desktop%20%7C%20Web-lightgrey?style=for-the-badge)
 ![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)
