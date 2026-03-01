@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="favicon.png">
     <title>Flock Lab — Boids Simulation</title>
     <style>
         * {
@@ -20,6 +21,8 @@
             padding: 0;
             background: #0a0a0f;
             overflow: hidden;
+            color: #ffffff;
+            font-family: sans-serif;
         }
 
         canvas {
@@ -30,27 +33,56 @@
             width: 100%;
             height: 100%;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
+        }
+
+        #error-message {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            max-width: 600px;
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff0000;
+            border-radius: 8px;
         }
     </style>
     <script>
         console.log("Pre-flight check: WebGL support detection...");
-        try {
+        function checkWebGL() {
             var canvas = document.createElement('canvas');
-            var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-            console.log("WebGL Context available:", !!gl);
-            if (gl) {
-                console.log("Renderer:", gl.getParameter(gl.RENDERER));
+            var gl = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            console.log("WebGL context search result:", !!gl);
+            if (!gl) {
+                var errorDiv = document.getElementById('error-message');
+                if (errorDiv) {
+                    errorDiv.style.display = 'block';
+                }
+                return false;
             }
-        } catch (e) {
-            console.log("Error during WebGL pre-flight check:", e);
+            console.log("Renderer:", gl.getParameter(gl.RENDERER));
+            return true;
         }
+        window.onload = checkWebGL;
     </script>
 </head>
 
 <body>
-    <div id="embed-html"></div>
+    <div id="embed-html">
+        <div id="error-message">
+            <h2>WebGL Not Found ❌</h2>
+            <br>
+            <p>Your browser or hardware has disabled WebGL support, which is required to run the Boids simulation.</p>
+            <br>
+            <p><strong>Common Fixes:</strong></p>
+            <ul style="text-align: left; display: inline-block;">
+                <li>Try an <strong>Incognito window</strong> (some extensions block WebGL).</li>
+                <li>Check <code>browser://settings/system</code> and ensure "Use hardware acceleration" is ON.</li>
+                <li>Visit <code>https://get.webgl.org/</code> to verify your browser's support.</li>
+            </ul>
+        </div>
+    </div>
     <script src="html/html.nocache.js"></script>
 </body>
 
