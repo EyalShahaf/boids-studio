@@ -23,6 +23,7 @@ public class ControlPanel {
     private final Skin skin;
 
     private Label boidCountLabel;
+    private final java.util.List<Runnable> uiSyncers = new java.util.ArrayList<>();
 
     public ControlPanel(Stage stage, Skin skin, World world, FlockLabGame game) {
         this.stage = stage;
@@ -73,15 +74,15 @@ public class ControlPanel {
         panel.add(topButtons).padBottom(20).row();
 
         // --- Sliders ---
-        addSliderRow(panel, "Max Speed", 10f, 400f, 1f, cfg.maxSpeed, val -> cfg.maxSpeed = val);
-        addSliderRow(panel, "Perception", 10f, 300f, 1f, cfg.perceptionRadius, val -> cfg.perceptionRadius = val);
+        addSliderRow(panel, "Max Speed", 10f, 400f, 1f, () -> cfg.maxSpeed, val -> cfg.maxSpeed = val);
+        addSliderRow(panel, "Perception", 10f, 300f, 1f, () -> cfg.perceptionRadius, val -> cfg.perceptionRadius = val);
 
         panel.add(new Label("--- Rule Weights ---", skin)).padTop(10).padBottom(10).row();
 
-        addSliderRow(panel, "Separation", 0f, 50f, 0.1f, cfg.separationWeight, val -> cfg.separationWeight = val);
-        addSliderRow(panel, "Alignment", 0f, 50f, 0.1f, cfg.alignmentWeight, val -> cfg.alignmentWeight = val);
-        addSliderRow(panel, "Cohesion", 0f, 50f, 0.1f, cfg.cohesionWeight, val -> cfg.cohesionWeight = val);
-        addSliderRow(panel, "Avoid Obstacles", 0f, 100f, 1f, cfg.obstacleAvoidanceWeight,
+        addSliderRow(panel, "Separation", 0f, 50f, 0.1f, () -> cfg.separationWeight, val -> cfg.separationWeight = val);
+        addSliderRow(panel, "Alignment", 0f, 50f, 0.1f, () -> cfg.alignmentWeight, val -> cfg.alignmentWeight = val);
+        addSliderRow(panel, "Cohesion", 0f, 50f, 0.1f, () -> cfg.cohesionWeight, val -> cfg.cohesionWeight = val);
+        addSliderRow(panel, "Avoid Obstacles", 0f, 100f, 1f, () -> cfg.obstacleAvoidanceWeight,
                 val -> cfg.obstacleAvoidanceWeight = val);
 
         // --- Presets ---
@@ -93,7 +94,9 @@ public class ControlPanel {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
                     preset.apply(cfg);
-                    // For a full implementation, we'd also update the slider UI values here
+                    for (Runnable syncer : uiSyncers) {
+                        syncer.run();
+                    }
                 }
             });
             panel.add(presetBtn).fillX().padBottom(5).row();
@@ -105,14 +108,14 @@ public class ControlPanel {
         panel.add(boidCountLabel).left().row();
     }
 
-    private void addSliderRow(Table panel, String name, float min, float max, float step, float initial,
+    private void addSliderRow(Table panel, String name, float min, float max, float step, ValueProvider provider,
             ValueUpdater updater) {
         Table row = new Table();
         Label nameLabel = new Label(name, skin);
-        Label valLabel = new Label(String.valueOf(Math.round(initial * 10f) / 10f), skin);
+        Label valLabel = new Label(String.valueOf(Math.round(provider.get() * 10f) / 10f), skin);
 
         Slider slider = new Slider(min, max, step, false, skin);
-        slider.setValue(initial);
+        slider.setValue(provider.get());
         slider.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -120,6 +123,10 @@ public class ControlPanel {
                 valLabel.setText(String.valueOf(Math.round(val * 10f) / 10f));
                 updater.update(val);
             }
+        });
+
+        uiSyncers.add(() -> {
+            slider.setValue(provider.get());
         });
 
         row.add(nameLabel).width(110).left();
@@ -138,5 +145,10 @@ public class ControlPanel {
     @FunctionalInterface
     private interface ValueUpdater {
         void update(float val);
+    }
+
+    @FunctionalInterface
+    private interface ValueProvider {
+        float get();
     }
 }
