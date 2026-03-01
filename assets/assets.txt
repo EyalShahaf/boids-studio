@@ -1,1 +1,3 @@
+t:com/badlogic/gdx/utils/lsans-15.fnt:com/badlogic/gdx/utils/lsans-15.fnt:17711:text/plain:1
+i:com/badlogic/gdx/utils/lsans-15.png:com/badlogic/gdx/utils/lsans-15.png:10270:image/png:1
 t:dummy.txt:dummy.txt:136:text/plain:1
