@@ -16,9 +16,13 @@ Flock Lab implements the classic flocking algorithm and extends it with real-tim
 
 ## 📌 Project Status
 
-**Step 2 / 12 Complete:** Core domain models implemented:
+**Step 4 / 12 Complete:** Simulation engine & config running:
 - `Vec2` — Immutable 2D vector math
 - `Boid`, `Obstacle`, `Attractor`, `Predator` — Core simulation entities
+- `World` & `SpatialGrid` — Fast O(1) neighbor lookups and tick simulation
+- `SimulationConfig` & `Preset` — Configurable flocking behaviors
+
+**Step 5 / 12 Complete:** Core integration tests implemented. Tests verify vector math, edge wrapping, stabilization, and flocking rules (JUnit 5).
 
 ------------------------------------------------------------------------
 
