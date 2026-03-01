@@ -26,6 +26,10 @@ Flock Lab implements the classic flocking algorithm and extends it with real-tim
 - Java 11 JRE emulation support
 - Full `html:dist` pipeline for browser-native playability
 
+**Step 10-12 / 12 Complete:** Polish, Documentation & CI:
+- Dynamic HSL coloring for boids based on velocity angle
+- GitHub Actions CI workflow for automatic builds and GitHub Pages deployment (`.github/workflows/build.yml`)
+
 ------------------------------------------------------------------------
 
 ## ✨ Features
