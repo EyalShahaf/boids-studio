@@ -5,8 +5,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.flocklab.config.SimulationConfig;
 import com.flocklab.input.InputHandler;
@@ -51,6 +55,20 @@ public class FlockLabGame extends ApplicationAdapter {
         stage = new Stage(new ScreenViewport());
         controlPanel = new ControlPanel(stage, skin, world, this);
         statsOverlay = new StatsOverlay(stage, skin, world);
+
+        // Footer: Developer Credit
+        Table footer = new Table();
+        footer.setFillParent(true);
+        footer.bottom().center();
+        TextButton creditBtn = new TextButton("Developed by Eyal Shahaf", skin);
+        creditBtn.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Gdx.net.openURI("https://github.com/EyalShahaf/boids-studio");
+            }
+        });
+        footer.add(creditBtn).padBottom(10);
+        stage.addActor(footer);
 
         // Input distribution: UI first, then world interactions
         InputMultiplexer multiplexer = new InputMultiplexer();

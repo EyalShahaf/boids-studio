@@ -1,7 +1,9 @@
 package com.flocklab.ui;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
@@ -105,7 +107,43 @@ public class ControlPanel {
         // --- Stats ---
         panel.add(new Label("--- Info ---", skin)).padTop(20).padBottom(10).row();
         boidCountLabel = new Label("Count: " + world.getBoids().size(), skin);
-        panel.add(boidCountLabel).left().row();
+        panel.add(boidCountLabel).left().padBottom(20).row();
+
+        // --- Details Button ---
+        TextButton detailsBtn = new TextButton("Project Details", skin);
+        detailsBtn.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                showDetailsDialog();
+            }
+        });
+        panel.add(detailsBtn).fillX().height(40);
+    }
+
+    private void showDetailsDialog() {
+        Dialog dialog = new Dialog("Boids Studio - Project Details", skin);
+        dialog.pad(20);
+
+        Table content = dialog.getContentTable();
+        content.left();
+        content.add(new Label("Flock Lab: A Real-time Boids Simulation", skin)).left().row();
+        content.add(new Label("Developed by: Eyal Shahaf", skin)).left().row();
+        content.add(new Label("Technology: LibGDX, Java, GWT (WebGL)", skin)).left().row();
+        content.add(new Label("Features: Separation, Alignment, Cohesion", skin)).left().row();
+        content.add(new Label("Interactive: Right-click to place obstacles", skin)).left().row();
+        content.add(new Label("             Left-click to spawn Boids", skin)).left().row();
+
+        TextButton githubBtn = new TextButton("View on GitHub", skin);
+        githubBtn.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Gdx.net.openURI("https://github.com/EyalShahaf/boids-studio");
+            }
+        });
+
+        dialog.button("Close");
+        dialog.getButtonTable().add(githubBtn).width(120).padLeft(10);
+        dialog.show(stage);
     }
 
     private void addSliderRow(Table panel, String name, float min, float max, float step, ValueProvider provider,
