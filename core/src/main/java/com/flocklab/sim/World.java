@@ -22,6 +22,12 @@ public class World {
     private final List<Attractor> attractors = new ArrayList<>();
     private final List<Predator> predators = new ArrayList<>();
 
+    public enum CursorMode {
+        BOID, OBSTACLE, ATTRACTOR, PREDATOR
+    }
+
+    private CursorMode currentMode = CursorMode.BOID;
+
     private SpatialGrid spatialGrid;
     private int nextBoidId = 0;
 
@@ -143,5 +149,13 @@ public class World {
         obstacles.clear();
         attractors.clear();
         predators.clear();
+    }
+
+    public CursorMode getCursorMode() {
+        return currentMode;
+    }
+
+    public void setCursorMode(CursorMode mode) {
+        this.currentMode = mode;
     }
 }

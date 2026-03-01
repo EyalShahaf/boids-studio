@@ -53,13 +53,18 @@ public class FlockLabGame extends ApplicationAdapter {
         // Setup UI
         skin = SkinFactory.createSkin();
         stage = new Stage(new ScreenViewport());
-        controlPanel = new ControlPanel(stage, skin, world, this);
-        statsOverlay = new StatsOverlay(stage, skin, world);
 
-        // Footer: Developer Credit
+        Table root = new Table();
+        root.setFillParent(true);
+        stage.addActor(root);
+
+        // Simulation area (left/center)
+        Table mainArea = new Table();
+        root.add(mainArea).expand().fill();
+
+        // Footer in mainArea
         Table footer = new Table();
-        footer.setFillParent(true);
-        footer.bottom(); // Align content to bottom of the table (which fills the screen)
+        footer.bottom();
         TextButton creditBtn = new TextButton("Developed by Eyal Shahaf", skin);
         creditBtn.addListener(new ChangeListener() {
             @Override
@@ -68,12 +73,16 @@ public class FlockLabGame extends ApplicationAdapter {
             }
         });
         footer.add(creditBtn).padBottom(10);
-        stage.addActor(footer);
+        mainArea.add(footer).expand().bottom().center();
+
+        // Control Panel (right)
+        controlPanel = new ControlPanel(root, stage, skin, world, this);
+        statsOverlay = new StatsOverlay(stage, skin, world);
 
         // Input distribution: UI first, then world interactions
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(stage);
-        multiplexer.addProcessor(new InputHandler(world, camera));
+        multiplexer.addProcessor(new InputHandler(world, camera, stage));
         Gdx.input.setInputProcessor(multiplexer);
 
         Gdx.app.log("FlockLab", "Initialized successfully with UI!");

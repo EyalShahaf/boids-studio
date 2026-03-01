@@ -1,8 +1,10 @@
 package com.flocklab.ui;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Cell;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -15,8 +17,12 @@ import com.flocklab.config.Preset;
 import com.flocklab.config.SimulationConfig;
 import com.flocklab.sim.World;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Side panel for controlling simulation parameters in real-time.
+ * Now supports retraction and tool selection.
  */
 public class ControlPanel {
     private final Stage stage;
@@ -24,36 +30,62 @@ public class ControlPanel {
     private final FlockLabGame game;
     private final Skin skin;
 
-    private Label boidCountLabel;
-    private final java.util.List<Runnable> uiSyncers = new java.util.ArrayList<>();
+    private final Table panel;
+    private final Cell<Table> panelCell;
+    private boolean isRetracted = false;
 
-    public ControlPanel(Stage stage, Skin skin, World world, FlockLabGame game) {
+    private Label boidCountLabel;
+    private final List<Runnable> uiSyncers = new ArrayList<>();
+    private final List<TextButton> toolButtons = new ArrayList<>();
+
+    public ControlPanel(Table root, Stage stage, Skin skin, World world, FlockLabGame game) {
         this.stage = stage;
         this.world = world;
         this.game = game;
         this.skin = skin;
 
-        Table root = new Table();
-        root.setFillParent(true);
-        root.right(); // Align panel to the right edge
+        // Container for the panel and the toggle button
+        Table container = new Table();
+        panelCell = root.add(container).width(250).expandY().fillY();
 
-        Table panel = new Table(skin);
+        panel = new Table(skin);
         panel.setBackground("panel_bg");
         panel.pad(15);
-
         buildPanel(panel);
 
-        root.add(panel).width(250).expandY().fillY();
-        stage.addActor(root);
+        // Retract/Expand button
+        final TextButton toggleBtn = new TextButton(">", skin);
+        toggleBtn.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                isRetracted = !isRetracted;
+                panel.setVisible(!isRetracted);
+                toggleBtn.setText(isRetracted ? "<" : ">");
+                panelCell.width(isRetracted ? 40 : 250);
+                root.invalidateHierarchy();
+            }
+        });
+
+        container.add(toggleBtn).width(40).expandY().fillY();
+        container.add(panel).expand().fill();
     }
 
     private void buildPanel(Table panel) {
         SimulationConfig cfg = world.getConfig();
 
-        panel.add(new Label("FLOCK LAB", skin)).padBottom(20).row();
+        panel.add(new Label("FLOCK LAB", skin)).padBottom(15).row();
+
+        // --- Tools ---
+        panel.add(new Label("--- Tools ---", skin)).padBottom(10).row();
+        Table tools = new Table();
+        addToolButton(tools, "Boids", World.CursorMode.BOID);
+        addToolButton(tools, "Obs", World.CursorMode.OBSTACLE);
+        addToolButton(tools, "Attr", World.CursorMode.ATTRACTOR);
+        addToolButton(tools, "Pred", World.CursorMode.PREDATOR);
+        panel.add(tools).padBottom(15).row();
 
         // --- Controls ---
-        TextButton pauseBtn = new TextButton(game.isPaused() ? "Resume" : "Pause", skin);
+        final TextButton pauseBtn = new TextButton(game.isPaused() ? "Resume" : "Pause", skin);
         pauseBtn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -71,16 +103,15 @@ public class ControlPanel {
         });
 
         Table topButtons = new Table();
-        topButtons.add(pauseBtn).width(100).padRight(10);
-        topButtons.add(clearBtn).width(100);
-        panel.add(topButtons).padBottom(20).row();
+        topButtons.add(pauseBtn).width(90).padRight(5);
+        topButtons.add(clearBtn).width(90);
+        panel.add(topButtons).padBottom(15).row();
 
         // --- Sliders ---
         addSliderRow(panel, "Max Speed", 10f, 400f, 1f, () -> cfg.maxSpeed, val -> cfg.maxSpeed = val);
         addSliderRow(panel, "Perception", 10f, 300f, 1f, () -> cfg.perceptionRadius, val -> cfg.perceptionRadius = val);
 
-        panel.add(new Label("--- Rule Weights ---", skin)).padTop(10).padBottom(10).row();
-
+        panel.add(new Label("--- Rule Weights ---", skin)).padTop(5).padBottom(5).row();
         addSliderRow(panel, "Separation", 0f, 50f, 0.1f, () -> cfg.separationWeight, val -> cfg.separationWeight = val);
         addSliderRow(panel, "Alignment", 0f, 50f, 0.1f, () -> cfg.alignmentWeight, val -> cfg.alignmentWeight = val);
         addSliderRow(panel, "Cohesion", 0f, 50f, 0.1f, () -> cfg.cohesionWeight, val -> cfg.cohesionWeight = val);
@@ -88,28 +119,30 @@ public class ControlPanel {
                 val -> cfg.obstacleAvoidanceWeight = val);
 
         // --- Presets ---
-        panel.add(new Label("--- Presets ---", skin)).padTop(20).padBottom(10).row();
-
-        for (Preset preset : Preset.values()) {
+        panel.add(new Label("--- Presets ---", skin)).padTop(10).padBottom(5).row();
+        Table presetTable = new Table();
+        for (final Preset preset : Preset.values()) {
             TextButton presetBtn = new TextButton(preset.getDisplayName(), skin);
             presetBtn.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
                     preset.apply(cfg);
-                    for (Runnable syncer : uiSyncers) {
+                    for (Runnable syncer : uiSyncers)
                         syncer.run();
-                    }
+                    updateToolSelection(); // Ensure tools state is reflected if preset changes something (though it
+                                           // doesn't currently)
                 }
             });
-            panel.add(presetBtn).fillX().padBottom(5).row();
+            presetTable.add(presetBtn).fillX().padBottom(2).row();
         }
+        panel.add(presetTable).fillX().row();
 
-        // --- Stats ---
-        panel.add(new Label("--- Info ---", skin)).padTop(20).padBottom(10).row();
+        // --- Info ---
+        panel.add(new Label("--- Info ---", skin)).padTop(10).padBottom(5).row();
         boidCountLabel = new Label("Count: " + world.getBoids().size(), skin);
-        panel.add(boidCountLabel).left().padBottom(20).row();
+        panel.add(boidCountLabel).left().padBottom(10).row();
 
-        // --- Details Button ---
+        // --- Project Details ---
         TextButton detailsBtn = new TextButton("Project Details", skin);
         detailsBtn.addListener(new ChangeListener() {
             @Override
@@ -117,42 +150,61 @@ public class ControlPanel {
                 showDetailsDialog();
             }
         });
-        panel.add(detailsBtn).fillX().height(40);
+        panel.add(detailsBtn).fillX().height(35);
+    }
+
+    private void addToolButton(Table table, String name, final World.CursorMode mode) {
+        final TextButton btn = new TextButton(name, skin);
+        toolButtons.add(btn);
+        btn.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                world.setCursorMode(mode);
+                updateToolSelection();
+            }
+        });
+        table.add(btn).width(50).pad(2);
+        updateToolSelection();
+    }
+
+    private void updateToolSelection() {
+        World.CursorMode current = world.getCursorMode();
+        int idx = current.ordinal();
+        for (int i = 0; i < toolButtons.size(); i++) {
+            toolButtons.get(i).setColor(i == idx ? Color.CYAN : Color.WHITE);
+        }
     }
 
     private void showDetailsDialog() {
-        Dialog dialog = new Dialog("Boids Studio - Project Details", skin);
+        Dialog dialog = new Dialog("Boids Studio", skin);
         dialog.pad(20);
-
         Table content = dialog.getContentTable();
         content.left();
-        content.add(new Label("Flock Lab: A Real-time Boids Simulation", skin)).left().row();
         content.add(new Label("Developed by: Eyal Shahaf", skin)).left().row();
-        content.add(new Label("Technology: LibGDX, Java, GWT (WebGL)", skin)).left().row();
-        content.add(new Label("Features: Separation, Alignment, Cohesion", skin)).left().row();
-        content.add(new Label("Interactive: Right-click to place obstacles", skin)).left().row();
-        content.add(new Label("             Left-click to spawn Boids", skin)).left().row();
+        content.add(new Label("Interactive Simulation", skin)).left().row();
+        content.add(new Label("Controls:", skin)).padTop(10).left().row();
+        content.add(new Label("- Left Click: Use selected tool", skin)).left().row();
+        content.add(new Label("- Right Click: Remove objects", skin)).left().row();
+        content.add(new Label("- Scroll: Zoom camera", skin)).left().row();
 
-        TextButton githubBtn = new TextButton("View on GitHub", skin);
+        TextButton githubBtn = new TextButton("View GitHub", skin);
         githubBtn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 Gdx.net.openURI("https://github.com/EyalShahaf/boids-studio");
             }
         });
-
         dialog.button("Close");
         dialog.getButtonTable().add(githubBtn).width(120).padLeft(10);
         dialog.show(stage);
     }
 
-    private void addSliderRow(Table panel, String name, float min, float max, float step, ValueProvider provider,
-            ValueUpdater updater) {
+    private void addSliderRow(Table panel, String name, float min, float max, float step, final ValueProvider provider,
+            final ValueUpdater updater) {
         Table row = new Table();
         Label nameLabel = new Label(name, skin);
-        Label valLabel = new Label(String.valueOf(Math.round(provider.get() * 10f) / 10f), skin);
-
-        Slider slider = new Slider(min, max, step, false, skin);
+        final Label valLabel = new Label(String.valueOf(Math.round(provider.get() * 10f) / 10f), skin);
+        final Slider slider = new Slider(min, max, step, false, skin);
         slider.setValue(provider.get());
         slider.addListener(new ChangeListener() {
             @Override
@@ -162,16 +214,11 @@ public class ControlPanel {
                 updater.update(val);
             }
         });
-
-        uiSyncers.add(() -> {
-            slider.setValue(provider.get());
-        });
-
-        row.add(nameLabel).width(110).left();
-        row.add(slider).width(80).padLeft(5).padRight(5);
+        uiSyncers.add(() -> slider.setValue(provider.get()));
+        row.add(nameLabel).width(100).left();
+        row.add(slider).width(70).padLeft(5).padRight(5);
         row.add(valLabel).width(35).right();
-
-        panel.add(row).padBottom(10).row();
+        panel.add(row).padBottom(5).row();
     }
 
     public void update() {
