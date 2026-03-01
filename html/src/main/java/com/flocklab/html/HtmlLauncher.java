@@ -11,9 +11,10 @@ public class HtmlLauncher extends GwtApplication {
     public GwtApplicationConfiguration getConfig() {
         // Resizable application, matches browser window
         GwtApplicationConfiguration config = new GwtApplicationConfiguration(true);
-        // Fixed padding to account for browser UI if needed
         config.padHorizontal = 0;
         config.padVertical = 0;
+        config.antialiasing = true;
+        config.alpha = true; // Often fixes WebGL context issues in some browsers
         return config;
     }
 
