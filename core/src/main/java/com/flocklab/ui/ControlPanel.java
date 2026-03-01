@@ -109,7 +109,7 @@ public class ControlPanel {
             ValueUpdater updater) {
         Table row = new Table();
         Label nameLabel = new Label(name, skin);
-        Label valLabel = new Label(String.format("%.1f", initial), skin);
+        Label valLabel = new Label(String.valueOf(Math.round(initial * 10f) / 10f), skin);
 
         Slider slider = new Slider(min, max, step, false, skin);
         slider.setValue(initial);
@@ -117,7 +117,7 @@ public class ControlPanel {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 float val = slider.getValue();
-                valLabel.setText(String.format("%.1f", val));
+                valLabel.setText(String.valueOf(Math.round(val * 10f) / 10f));
                 updater.update(val);
             }
         });

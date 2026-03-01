@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Renders fading motion trails behind boids.
@@ -30,7 +31,7 @@ public class TrailRenderer {
 
         // Clean up dead boids from history
         if (history.size() > boids.size() * 1.5) {
-            history.keySet().retainAll(boids.stream().map(Boid::getId).toList());
+            history.keySet().retainAll(boids.stream().map(Boid::getId).collect(Collectors.toList()));
         }
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);

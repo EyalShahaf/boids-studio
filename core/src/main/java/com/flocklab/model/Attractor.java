@@ -1,8 +1,22 @@
 package com.flocklab.model;
 
 /**
- * A point in space that attracts boids (e.g., food or a waypoint).
- * Strength determines how powerfully boids are drawn to it.
+ * Point of interest that boids are drawn towards (e.g., food source).
  */
-public record Attractor(Vec2 position, float strength) {
+public class Attractor {
+    private final Vec2 position;
+    private final float strength;
+
+    public Attractor(Vec2 position, float strength) {
+        this.position = position;
+        this.strength = strength;
+    }
+
+    public Vec2 position() {
+        return position;
+    }
+
+    public float strength() {
+        return strength;
+    }
 }

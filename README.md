@@ -22,10 +22,10 @@ Flock Lab implements the classic flocking algorithm and extends it with real-tim
 - `World` & `SpatialGrid` — Fast O(1) neighbor lookups and tick simulation
 - `SimulationConfig` & `Preset` — Configurable flocking behaviors
 
-**Step 7 / 12 Complete:** Desktop Launcher integrated:
-- Wired simulation, rendering, and window lifecycle
-- Keyboard & Mouse interaction (Zoom, placing boids/obstacles/attractors)
-- Desktop-native performance with LWJGL3
+**Step 8 / 12 Complete:** Interactive UI Panel added:
+- Real-time tweaking of weights, speed, and perception using Scene2D Sliders
+- Preset buttons for different flocking behaviors
+- FPS & Object Count HUD overlays
 
 ------------------------------------------------------------------------
 
