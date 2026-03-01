@@ -23,18 +23,21 @@ public class BoidRenderer {
     public void render(ShapeRenderer shapeRenderer, List<Boid> boids, List<Predator> predators) {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        // Draw normal boids
-        shapeRenderer.setColor(boidColor);
+        // Draw normal boids with dynamic colors based on velocity angle
         for (Boid boid : boids) {
+            float angle = boid.getVelocity().angle();
+            // Map angle to hue (0-360)
+            boidColor.fromHsv((angle + 360) % 360, 0.7f, 0.9f);
+            shapeRenderer.setColor(boidColor);
             drawOrientedTriangle(shapeRenderer, boid.getPosition().x(), boid.getPosition().y(),
-                    boid.getVelocity().angle(), BOID_SIZE);
+                    (float) Math.toRadians(angle), BOID_SIZE);
         }
 
         // Draw predators
         shapeRenderer.setColor(predatorColor);
         for (Predator predator : predators) {
             drawOrientedTriangle(shapeRenderer, predator.getPosition().x(), predator.getPosition().y(),
-                    predator.getVelocity().angle(), PREDATOR_SIZE);
+                    (float) Math.toRadians(predator.getVelocity().angle()), PREDATOR_SIZE);
         }
 
         shapeRenderer.end();

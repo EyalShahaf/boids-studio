@@ -22,10 +22,9 @@ Flock Lab implements the classic flocking algorithm and extends it with real-tim
 - `World` & `SpatialGrid` — Fast O(1) neighbor lookups and tick simulation
 - `SimulationConfig` & `Preset` — Configurable flocking behaviors
 
-**Step 8 / 12 Complete:** Interactive UI Panel added:
-- Real-time tweaking of weights, speed, and perception using Scene2D Sliders
-- Preset buttons for different flocking behaviors
-- FPS & Object Count HUD overlays
+**Step 9 / 12 Complete:** HTML/Web Build compiled via GWT:
+- Java 11 JRE emulation support
+- Full `html:dist` pipeline for browser-native playability
 
 ------------------------------------------------------------------------
 
