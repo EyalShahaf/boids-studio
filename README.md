@@ -8,13 +8,18 @@
 ![Platform](https://img.shields.io/badge/platform-Desktop%20%7C%20Web-lightgrey?style=for-the-badge)
 ![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)
 
-An interactive **Boids (flocking) simulation** built with modern **Java
-21** and **LibGDX**, designed as a clean-architecture, portfolio-grade
-hobby project.
+An interactive **Boids (flocking) simulation** built with modern **Java 21** and **LibGDX**, designed as a clean-architecture, portfolio-grade hobby project.
 
-Flock Lab implements the classic flocking algorithm and extends it with
-real-time configuration, predator-prey mechanics, obstacle avoidance,
-and browser deployment.
+Flock Lab implements the classic flocking algorithm and extends it with real-time configuration, predator-prey mechanics, obstacle avoidance, and browser deployment.
+
+---
+
+## 📌 Project Status
+
+**Step 1 / 12 Complete:** Project scaffolding is set up with Gradle multi-module architecture:
+- `core` (Pure Java)
+- `lwjgl3` (Desktop LibGDX)
+- `html` (Web GWT)
 
 ------------------------------------------------------------------------
 

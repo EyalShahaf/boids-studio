@@ -1,0 +1,45 @@
+# Java / Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+out/
+*.class
+*.jar
+!gradle/wrapper/*.jar
+*.war
+*.ear
+*.iml
+
+# IntelliJ IDEA
+.idea/
+*.ipr
+*.iws
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# LibGDX
+/local.properties
+/html/war/
+/html/gwt-unitCache/
+
+# Compiled GWT output
+/html/build/
+/lwjgl3/build/
+/core/build/
+
+# Temporary files
+*.log
+*.tmp
+hs_err_pid*

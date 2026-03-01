@@ -1,0 +1,58 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.docstr:gwt-gradle-plugin:$gwtPluginVersion"
+    }
+}
+
+apply plugin: 'gwt'
+apply plugin: 'war'
+apply plugin: 'org.gretty'
+
+dependencies {
+    implementation project(':core')
+
+    implementation "com.badlogicgames.gdx:gdx:$gdxVersion:sources"
+    implementation "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion"
+    implementation "com.badlogicgames.gdx:gdx-backend-gwt:$gdxVersion:sources"
+    implementation "com.google.jsinterop:jsinterop-annotations:2.0.2:sources"
+}
+
+gwt {
+    gwtVersion = project.ext.gwtVersion
+    maxHeapSize = '1G'
+    minHeapSize = '512M'
+
+    src += files(project(':core').sourceSets.main.allJava.srcDirs)
+
+    modules 'com.flocklab.GdxDefinition'
+    devModules 'com.flocklab.GdxDefinitionSuperdev'
+
+    compiler {
+        strict = true
+        disableCastChecking = true
+        style = 'OBF'
+    }
+}
+
+gretty {
+    httpPort = 8080
+    contextPath = '/'
+    servletContainer = 'jetty11'
+    resourceBase = "${buildDir}/gwt/draftOut"
+}
+
+task dist(dependsOn: [compileGwt]) {
+    doLast {
+        copy {
+            from "${buildDir}/gwt/out"
+            into "${buildDir}/dist"
+        }
+        copy {
+            from "webapp"
+            into "${buildDir}/dist"
+        }
+    }
+}
