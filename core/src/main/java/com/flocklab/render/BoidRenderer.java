@@ -25,19 +25,20 @@ public class BoidRenderer {
 
         // Draw normal boids with dynamic colors based on velocity angle
         for (Boid boid : boids) {
-            float angle = boid.getVelocity().angle();
+            float angleRad = boid.getVelocity().angle();
+            float angleDeg = (float) Math.toDegrees(angleRad);
             // Map angle to hue (0-360)
-            boidColor.fromHsv((angle + 360) % 360, 0.7f, 0.9f);
+            boidColor.fromHsv((angleDeg + 360) % 360, 0.7f, 0.9f);
             shapeRenderer.setColor(boidColor);
             drawOrientedTriangle(shapeRenderer, boid.getPosition().x(), boid.getPosition().y(),
-                    (float) Math.toRadians(angle), BOID_SIZE);
+                    angleRad, BOID_SIZE);
         }
 
         // Draw predators
         shapeRenderer.setColor(predatorColor);
         for (Predator predator : predators) {
             drawOrientedTriangle(shapeRenderer, predator.getPosition().x(), predator.getPosition().y(),
-                    (float) Math.toRadians(predator.getVelocity().angle()), PREDATOR_SIZE);
+                    predator.getVelocity().angle(), PREDATOR_SIZE);
         }
 
         shapeRenderer.end();

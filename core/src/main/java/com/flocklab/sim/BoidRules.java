@@ -22,7 +22,7 @@ public class BoidRules {
             if (other != boid && d2 > 0 && d2 < perceptionRadius * perceptionRadius) {
                 float d = (float) Math.sqrt(d2);
                 Vec2 diff = boid.getPosition().sub(other.getPosition());
-                diff = diff.normalize().scale(1f / d); // Weight by inverse distance
+                diff = diff.normalize().scale(500f / d); // Boost weight by inverse distance strongly
                 steering = steering.add(diff);
                 count++;
             }
@@ -79,7 +79,7 @@ public class BoidRules {
             // Steer away strongly when close to obstacle radius
             if (d < avoidRadius + obs.radius()) {
                 float force = (avoidRadius + obs.radius()) - d;
-                steering = steering.add(diff.normalize().scale(force));
+                steering = steering.add(diff.normalize().scale(force * 5f)); // Boost avoidance steering
             }
         }
         return steering;

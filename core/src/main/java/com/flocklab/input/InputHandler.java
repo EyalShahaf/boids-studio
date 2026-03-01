@@ -27,6 +27,10 @@ public class InputHandler extends InputAdapter {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        if (button == Input.Buttons.RIGHT) {
+            handleRightClick(screenX, screenY);
+            return true;
+        }
         if (button != Input.Buttons.LEFT)
             return false;
         return handleInteraction(screenX, screenY);
@@ -39,6 +43,10 @@ public class InputHandler extends InputAdapter {
                 !Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) &&
                 !Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {
             spawnBoid(screenX, screenY);
+            return true;
+        }
+        if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
+            handleRightClick(screenX, screenY);
             return true;
         }
         return false;
@@ -69,6 +77,18 @@ public class InputHandler extends InputAdapter {
             // Normal Click -> Spawn Boid
             spawnBoid(screenX, screenY);
             return true;
+        }
+    }
+
+    private void handleRightClick(int screenX, int screenY) {
+        tempVec.set(screenX, screenY, 0);
+        camera.unproject(tempVec);
+        Vec2 worldPos = new Vec2(tempVec.x, tempVec.y);
+
+        // Remove obstacle if clicked on it, else place it
+        boolean removed = world.removeObstacleNear(worldPos, 30f);
+        if (!removed) {
+            world.addObstacle(new Obstacle(worldPos, 30f));
         }
     }
 

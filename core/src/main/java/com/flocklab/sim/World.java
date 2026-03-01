@@ -120,6 +120,16 @@ public class World {
         obstacles.add(obs);
     }
 
+    public boolean removeObstacleNear(Vec2 pos, float radius) {
+        for (int i = 0; i < obstacles.size(); i++) {
+            if (obstacles.get(i).center().distanceTo(pos) <= radius) {
+                obstacles.remove(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void addAttractor(Attractor att) {
         attractors.add(att);
     }
