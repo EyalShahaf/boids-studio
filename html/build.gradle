@@ -86,7 +86,7 @@ task dist(dependsOn: [compileGwt]) {
                     mime = "text/plain"
                 }
 
-                file.append(type + ":" + path + ":" + f.length() + ":" + mime + "\n")
+                file.append(type + ":" + path + ":" + path + ":" + f.length() + ":" + mime + ":1\n")
             }
         }
     }
