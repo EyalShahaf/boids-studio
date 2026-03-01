@@ -12,12 +12,13 @@
             box-sizing: border-box;
         }
 
+        html,
         body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
             background: #0a0a0f;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
             overflow: hidden;
         }
 
@@ -28,8 +29,24 @@
         #embed-html {
             width: 100%;
             height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
     </style>
+    <script>
+        console.log("Pre-flight check: WebGL support detection...");
+        try {
+            var canvas = document.createElement('canvas');
+            var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            console.log("WebGL Context available:", !!gl);
+            if (gl) {
+                console.log("Renderer:", gl.getParameter(gl.RENDERER));
+            }
+        } catch (e) {
+            console.log("Error during WebGL pre-flight check:", e);
+        }
+    </script>
 </head>
 
 <body>
