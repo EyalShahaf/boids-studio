@@ -16,10 +16,9 @@ Flock Lab implements the classic flocking algorithm and extends it with real-tim
 
 ## 📌 Project Status
 
-**Step 1 / 12 Complete:** Project scaffolding is set up with Gradle multi-module architecture:
-- `core` (Pure Java)
-- `lwjgl3` (Desktop LibGDX)
-- `html` (Web GWT)
+**Step 2 / 12 Complete:** Core domain models implemented:
+- `Vec2` — Immutable 2D vector math
+- `Boid`, `Obstacle`, `Attractor`, `Predator` — Core simulation entities
 
 ------------------------------------------------------------------------
 
