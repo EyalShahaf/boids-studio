@@ -22,7 +22,9 @@ Flock Lab implements the classic flocking algorithm and extends it with real-tim
 - `World` & `SpatialGrid` — Fast O(1) neighbor lookups and tick simulation
 - `SimulationConfig` & `Preset` — Configurable flocking behaviors
 
-**Step 5 / 12 Complete:** Core integration tests implemented. Tests verify vector math, edge wrapping, stabilization, and flocking rules (JUnit 5).
+**Step 6 / 12 Complete:** Shared rendering layer implemented:
+- `WorldRenderer` — Coordinates all layers using `ShapeRenderer`
+- Boids, Trails, and Background rendering with alpha blending
 
 ------------------------------------------------------------------------
 
