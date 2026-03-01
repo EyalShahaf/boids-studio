@@ -59,6 +59,7 @@ public class FlockLabGame extends ApplicationAdapter {
         // Footer: Developer Credit
         Table footer = new Table();
         footer.setFillParent(true);
+        footer.bottom(); // Align content to bottom of the table (which fills the screen)
         TextButton creditBtn = new TextButton("Developed by Eyal Shahaf", skin);
         creditBtn.addListener(new ChangeListener() {
             @Override
@@ -66,7 +67,7 @@ public class FlockLabGame extends ApplicationAdapter {
                 Gdx.net.openURI("https://github.com/EyalShahaf/boids-studio");
             }
         });
-        footer.add(creditBtn).expand().bottom().padBottom(10);
+        footer.add(creditBtn).padBottom(10);
         stage.addActor(footer);
 
         // Input distribution: UI first, then world interactions
