@@ -29,6 +29,8 @@ jar {
     archiveBaseName = rootProject.ext.appName
 
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    
+    dependsOn project(':core').tasks.named('jar')
 
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }

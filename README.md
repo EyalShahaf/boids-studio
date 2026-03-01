@@ -16,19 +16,13 @@ Flock Lab implements the classic flocking algorithm and extends it with real-tim
 
 ## 📌 Project Status
 
-**Step 4 / 12 Complete:** Simulation engine & config running:
-- `Vec2` — Immutable 2D vector math
-- `Boid`, `Obstacle`, `Attractor`, `Predator` — Core simulation entities
-- `World` & `SpatialGrid` — Fast O(1) neighbor lookups and tick simulation
-- `SimulationConfig` & `Preset` — Configurable flocking behaviors
+**All 12 / 12 Steps Complete!** 🎉
 
-**Step 9 / 12 Complete:** HTML/Web Build compiled via GWT:
-- Java 11 JRE emulation support
-- Full `html:dist` pipeline for browser-native playability
-
-**Step 10-12 / 12 Complete:** Polish, Documentation & CI:
-- Dynamic HSL coloring for boids based on velocity angle
-- GitHub Actions CI workflow for automatic builds and GitHub Pages deployment (`.github/workflows/build.yml`)
+- ✅ **Core Physics & Simulation:** Domain models (`Vec2`, `Boid`), flocking rules, spatial grids.
+- ✅ **Desktop & Web Builds:** Runs locally via LWJGL3 and in browser via GWT/HTML.
+- ✅ **Interactive UI Controls:** Real-time property tweaking with Scene2D sliders & HUD.
+- ✅ **Visual Polish:** Dynamic HSL coloring, additive blending, and fading motion trails.
+- ✅ **CI Pipeline:** Automated builds and GitHub Pages deployment via GitHub Actions.
 
 ------------------------------------------------------------------------
 

@@ -31,12 +31,16 @@ public class SkinFactory {
         Color sliderBgColor = new Color(0.3f, 0.3f, 0.4f, 1f);
         Color sliderKnobColor = new Color(0.5f, 0.7f, 0.9f, 1f);
 
-        // Textures mapped to drawables
-        skin.add("panel_bg", createColorDrawable(panelColor));
-        skin.add("button_up", createColorDrawable(buttonColor));
-        skin.add("button_down", createColorDrawable(buttonDownColor));
-        skin.add("slider_bg", createColorDrawable(sliderBgColor, 100, 4));
-        skin.add("slider_knob", createColorDrawable(sliderKnobColor, 12, 12));
+        // Textures mapped to drawables explicitly as Drawable.class so getDrawable()
+        // works
+        skin.add("panel_bg", createColorDrawable(panelColor), com.badlogic.gdx.scenes.scene2d.utils.Drawable.class);
+        skin.add("button_up", createColorDrawable(buttonColor), com.badlogic.gdx.scenes.scene2d.utils.Drawable.class);
+        skin.add("button_down", createColorDrawable(buttonDownColor),
+                com.badlogic.gdx.scenes.scene2d.utils.Drawable.class);
+        skin.add("slider_bg", createColorDrawable(sliderBgColor, 100, 4),
+                com.badlogic.gdx.scenes.scene2d.utils.Drawable.class);
+        skin.add("slider_knob", createColorDrawable(sliderKnobColor, 12, 12),
+                com.badlogic.gdx.scenes.scene2d.utils.Drawable.class);
 
         // Styles
         LabelStyle labelStyle = new LabelStyle();
