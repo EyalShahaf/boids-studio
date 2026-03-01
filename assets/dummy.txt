@@ -1,0 +1,1 @@
+This file exists to ensure the GWT build generates an assets.txt manifest for the preloader, even if the game contains no other assets.
