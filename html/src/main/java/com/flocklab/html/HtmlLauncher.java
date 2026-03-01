@@ -14,7 +14,7 @@ public class HtmlLauncher extends GwtApplication {
         config.padHorizontal = 0;
         config.padVertical = 0;
         config.antialiasing = true;
-        config.alpha = true; // Often fixes WebGL context issues in some browsers
+        config.useGL30 = false; // Force WebGL 1.0 for maximum compatibility
         return config;
     }
 
