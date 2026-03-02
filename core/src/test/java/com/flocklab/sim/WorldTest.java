@@ -7,8 +7,6 @@ import com.flocklab.model.Predator;
 import com.flocklab.model.Vec2;
 import org.junit.jupiter.api.Test;
 
-import java.util.Random;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 class WorldTest {
