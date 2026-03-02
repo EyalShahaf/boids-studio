@@ -11,7 +11,7 @@ public class DesktopLauncher {
         config.setTitle("Flock Lab");
         config.setWindowedMode(1280, 720);
         config.useVsync(true);
-        config.setForegroundFPS(60);
+        config.setForegroundFPS(0); // 0 means no limit (will be throttled by VSync if true)
 
         new Lwjgl3Application(new FlockLabGame(), config);
     }

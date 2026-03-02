@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.flocklab.model.Attractor;
@@ -20,8 +21,9 @@ public class InputHandler extends InputAdapter {
     private final OrthographicCamera camera;
     private final Stage stage;
 
-    // Temporary vector for unprojecting mouse coordinates to world coordinates
+    // Temporary vectors for unprojecting coordinates
     private final Vector3 tempVec = new Vector3();
+    private final Vector2 tempVec2 = new Vector2();
 
     public InputHandler(World world, OrthographicCamera camera, Stage stage) {
         this.world = world;
@@ -30,9 +32,9 @@ public class InputHandler extends InputAdapter {
     }
 
     private boolean isOverUI(int screenX, int screenY) {
-        // Scene2D coordinates are y-down for hit detection, but stage uses internal
-        // viewport logic
-        return stage.hit(screenX, Gdx.graphics.getHeight() - screenY, true) != null;
+        tempVec2.set(screenX, screenY);
+        stage.screenToStageCoordinates(tempVec2);
+        return stage.hit(tempVec2.x, tempVec2.y, true) != null;
     }
 
     @Override

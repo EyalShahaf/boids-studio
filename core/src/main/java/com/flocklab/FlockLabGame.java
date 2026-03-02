@@ -85,6 +85,10 @@ public class FlockLabGame extends ApplicationAdapter {
         multiplexer.addProcessor(new InputHandler(world, camera, stage));
         Gdx.input.setInputProcessor(multiplexer);
 
+        // Allow FPS higher than 60 if the hardware supports it (locks to refresh rate
+        // by default)
+        Gdx.graphics.setForegroundFPS(0);
+
         Gdx.app.log("FlockLab", "Initialized successfully with UI!");
     }
 

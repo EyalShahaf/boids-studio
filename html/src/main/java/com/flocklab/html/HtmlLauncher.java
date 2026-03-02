@@ -15,11 +15,6 @@ public class HtmlLauncher extends GwtApplication {
         config.padVertical = 0;
         config.antialiasing = true;
         config.useGL30 = false; // Force WebGL 1.0 for maximum compatibility
-        // Let the browser handle FPS (usually via requestAnimationFrame)
-        // Set to a high value like 0 or -1 to let the browser determine refresh rate
-        // In GWT backend, setting this to a higher value like 120 or 240 can also help
-        // if it's capping at 60.
-        config.fps = 0; // 0 usually means "no limit" or use browser's requestAnimationFrame
         return config;
     }
 
