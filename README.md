@@ -114,7 +114,7 @@ Integration-focused testing
 ### ▶ Run Desktop Version
 
 ``` bash
-./gradlew :boids-desktop:run
+./gradlew run
 ```
 
 ### 🌐 Build Web Version
