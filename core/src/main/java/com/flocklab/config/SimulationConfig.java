@@ -26,6 +26,16 @@ public class SimulationConfig {
     public float boidStaminaRegenBaseRate = 10f;
     public float boidStaminaRegenNearFoodBonus = 15f;
 
+    public float predatorHungerMax = 100f;
+    public float predatorHungerDrainRate = 4f;
+    public float predatorHungerOnEat = 40f;
+    public float predatorStaminaMax = 100f;
+    public float predatorStaminaDrainRate = 25f;
+    public float predatorSprintTriggerRadius = 100f;
+    public float predatorSprintSpeedMultiplier = 1.5f;
+    public float predatorEatRadius = 12f;
+    public float predatorEatChancePerSecond = 0.70f;
+
     public int initialBoidCount = 500;
     public float worldWidth = 1280f;
     public float worldHeight = 720f;
@@ -50,6 +60,15 @@ public class SimulationConfig {
         this.boidStaminaDrainRate = other.boidStaminaDrainRate;
         this.boidStaminaRegenBaseRate = other.boidStaminaRegenBaseRate;
         this.boidStaminaRegenNearFoodBonus = other.boidStaminaRegenNearFoodBonus;
+        this.predatorHungerMax = other.predatorHungerMax;
+        this.predatorHungerDrainRate = other.predatorHungerDrainRate;
+        this.predatorHungerOnEat = other.predatorHungerOnEat;
+        this.predatorStaminaMax = other.predatorStaminaMax;
+        this.predatorStaminaDrainRate = other.predatorStaminaDrainRate;
+        this.predatorSprintTriggerRadius = other.predatorSprintTriggerRadius;
+        this.predatorSprintSpeedMultiplier = other.predatorSprintSpeedMultiplier;
+        this.predatorEatRadius = other.predatorEatRadius;
+        this.predatorEatChancePerSecond = other.predatorEatChancePerSecond;
         this.initialBoidCount = other.initialBoidCount;
         this.worldWidth = other.worldWidth;
         this.worldHeight = other.worldHeight;

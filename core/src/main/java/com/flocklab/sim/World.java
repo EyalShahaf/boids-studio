@@ -10,7 +10,10 @@ import com.flocklab.model.Vec2;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 /**
  * The top-level simulation orchestrator.
@@ -31,12 +34,21 @@ public class World {
 
     private SpatialGrid spatialGrid;
     private int nextBoidId = 0;
+    private int nextPredatorId = 0;
+
+    private final Random random = new Random();
 
     /** Reusable neighbor buffer — avoids a new ArrayList allocation per boid per frame. */
     private final List<Boid> neighborBuffer = new ArrayList<>();
 
     /** Pre-allocated proxy boid used for predator spatial queries. */
     private final Boid predatorProxy = new Boid(-1, Vec2.ZERO, Vec2.ZERO, 0f);
+
+    // ---- Game Of Life statistics ----
+    private int totalBoidsCreated = 0;
+    private int totalBoidsEaten = 0;
+    private int totalPredatorsCreated = 0;
+    private int totalPredatorsDiedOfHunger = 0;
 
     public World(SimulationConfig config) {
         this.config = config;
@@ -49,6 +61,7 @@ public class World {
             float vy = (float) (Math.random() * 2 - 1);
             boids.add(new Boid(nextBoidId++, new Vec2(x, y),
                     new Vec2(vx, vy).setMagnitude(config.maxSpeed), config.boidStaminaMax));
+            totalBoidsCreated++;
         }
     }
 
@@ -65,6 +78,7 @@ public class World {
         float worldWidth = config.worldWidth;
         float worldHeight = config.worldHeight;
 
+        // --- Boid steering forces ---
         for (int i = 0; i < boids.size(); i++) {
             Boid boid = boids.get(i);
             spatialGrid.getNeighborsInto(boid, perceptionRadius, neighborBuffer);
@@ -82,6 +96,7 @@ public class World {
                     .scale(config.foodAttractionWeight));
         }
 
+        // --- Boid physics + stamina ---
         for (int i = 0; i < boids.size(); i++) {
             Boid boid = boids.get(i);
             updateBoidStaminaAndSprint(boid, deltaTime);
@@ -89,23 +104,34 @@ public class World {
                     worldWidth, worldHeight);
         }
 
+        // --- Predator update ---
         if (!predators.isEmpty()) {
             float predatorRadius = perceptionRadius * 2f;
             float predatorRadiusSq = predatorRadius * predatorRadius;
+
+            Set<Integer> eatenBoidIds = new HashSet<>();
+            List<Predator> deadPredators = new ArrayList<>();
+
             for (int i = 0; i < predators.size(); i++) {
                 Predator predator = predators.get(i);
                 predatorProxy.setPosition(predator.getPosition());
                 spatialGrid.getNeighborsInto(predatorProxy, predatorRadius, neighborBuffer);
-                Vec2 chase = BoidRules.cohesionSquaredRadius(predatorProxy, neighborBuffer, predatorRadiusSq);
-                predator.update(chase, deltaTime, worldWidth, worldHeight);
+
+                Vec2 baseChase = BoidRules.cohesionSquaredRadius(predatorProxy, neighborBuffer, predatorRadiusSq);
+                Vec2 chase = updatePredatorHungerAndSprint(predator, neighborBuffer, baseChase, deltaTime, deadPredators);
+
+                predator.update(chase, deltaTime, config.predatorSprintSpeedMultiplier, worldWidth, worldHeight);
+                handlePredatorEating(predator, boids, eatenBoidIds, deltaTime);
             }
+
+            removeDeadEntities(eatenBoidIds, deadPredators);
         }
     }
 
     /**
      * Updates stamina and sprint state for a single boid.
      * Sprint triggers when any predator is within boidSprintTriggerRadius and stamina > 0.
-     * Stamina always regenerates at the base rate; near attractors an additional bonus applies.
+     * Stamina always regenerates at the base rate; near attractors an extra bonus applies.
      */
     private void updateBoidStaminaAndSprint(Boid boid, float deltaTime) {
         float sprintRadiusSq = config.boidSprintTriggerRadius * config.boidSprintTriggerRadius;
@@ -147,6 +173,95 @@ public class World {
         boid.setStamina(MathUtils.clamp(stamina, 0f, config.boidStaminaMax));
     }
 
+    /**
+     * Updates predator hunger and stamina/sprint state.
+     * Returns the hunger-scaled chase force to use for movement.
+     * Marks the predator dead (adds to deadPredators) when hunger reaches zero.
+     */
+    private Vec2 updatePredatorHungerAndSprint(Predator predator, List<Boid> nearbyBoids,
+            Vec2 baseChase, float deltaTime, List<Predator> deadPredators) {
+        // Drain hunger
+        float hunger = predator.getHunger() - config.predatorHungerDrainRate * deltaTime;
+        predator.setHunger(MathUtils.clamp(hunger, 0f, config.predatorHungerMax));
+
+        if (predator.getHunger() <= 0f) {
+            deadPredators.add(predator);
+            return Vec2.ZERO;
+        }
+
+        // Hunger-scaled chase force: starving predators chase up to 3x harder
+        float hungerFraction = predator.getHunger() / config.predatorHungerMax;
+        float hungerFactor = 1f + (1f - hungerFraction) * 2f;
+        Vec2 scaledChase = baseChase.scale(hungerFactor);
+
+        // Sprint when any nearby boid is within sprint radius
+        float sprintRadiusSq = config.predatorSprintTriggerRadius * config.predatorSprintTriggerRadius;
+        boolean boidNear = false;
+        for (int n = 0; n < nearbyBoids.size(); n++) {
+            float dx = predator.getPosition().x() - nearbyBoids.get(n).getPosition().x();
+            float dy = predator.getPosition().y() - nearbyBoids.get(n).getPosition().y();
+            if (dx * dx + dy * dy < sprintRadiusSq) {
+                boidNear = true;
+                break;
+            }
+        }
+
+        float stamina = predator.getStamina();
+        if (boidNear && stamina > 0f) {
+            predator.setSprinting(true);
+            stamina -= config.predatorStaminaDrainRate * deltaTime;
+        } else {
+            predator.setSprinting(false);
+        }
+        predator.setStamina(MathUtils.clamp(stamina, 0f, config.predatorStaminaMax));
+
+        return scaledChase;
+    }
+
+    /**
+     * Checks boids near the predator and probabilistically eats them.
+     * Eating chance scales with hunger (starving predators eat more frantically).
+     * Eaten boid IDs are collected in eatenBoidIds for deferred removal.
+     */
+    private void handlePredatorEating(Predator predator, List<Boid> allBoids,
+            Set<Integer> eatenBoidIds, float deltaTime) {
+        float eatRadiusSq = config.predatorEatRadius * config.predatorEatRadius;
+        float baseChance = config.predatorEatChancePerSecond * deltaTime;
+        float hungerFraction = predator.getHunger() / config.predatorHungerMax;
+        float hungerFactor = 1f + (1f - hungerFraction); // up to 2x when starving
+        float p = Math.min(baseChance * hungerFactor, 1f);
+
+        for (int i = 0; i < allBoids.size(); i++) {
+            Boid boid = allBoids.get(i);
+            if (eatenBoidIds.contains(boid.getId())) continue;
+
+            float dx = predator.getPosition().x() - boid.getPosition().x();
+            float dy = predator.getPosition().y() - boid.getPosition().y();
+            if (dx * dx + dy * dy < eatRadiusSq) {
+                if (random.nextFloat() < p) {
+                    eatenBoidIds.add(boid.getId());
+                    float newHunger = predator.getHunger() + config.predatorHungerOnEat;
+                    predator.setHunger(MathUtils.clamp(newHunger, 0f, config.predatorHungerMax));
+                    totalBoidsEaten++;
+                }
+            }
+        }
+    }
+
+    /**
+     * Removes eaten boids and dead (starved) predators after all updates are done,
+     * avoiding ConcurrentModificationException.
+     */
+    private void removeDeadEntities(Set<Integer> eatenBoidIds, List<Predator> deadPredators) {
+        if (!eatenBoidIds.isEmpty()) {
+            boids.removeIf(b -> eatenBoidIds.contains(b.getId()));
+        }
+        if (!deadPredators.isEmpty()) {
+            totalPredatorsDiedOfHunger += deadPredators.size();
+            predators.removeAll(deadPredators);
+        }
+    }
+
     private SpatialGrid createGrid() {
         return new SpatialGrid(Math.max(config.perceptionRadius, 50f), config.worldWidth, config.worldHeight);
     }
@@ -182,6 +297,7 @@ public class World {
 
     public void addBoid(Vec2 pos, Vec2 vel) {
         boids.add(new Boid(nextBoidId++, pos, vel, config.boidStaminaMax));
+        totalBoidsCreated++;
     }
 
     public void addObstacle(Obstacle obs) {
@@ -202,8 +318,18 @@ public class World {
         attractors.add(att);
     }
 
+    /** Spawns a predator at the given world position with full stamina and hunger. */
+    public void spawnPredator(Vec2 pos) {
+        predators.add(new Predator(nextPredatorId++, pos, Vec2.ZERO,
+                config.maxSpeed * 1.5f, config.predatorStaminaMax, config.predatorHungerMax));
+        totalPredatorsCreated++;
+    }
+
+    /** @deprecated Use {@link #spawnPredator(Vec2)} to ensure proper stamina/hunger initialisation. */
+    @Deprecated
     public void addPredator(Predator pred) {
         predators.add(pred);
+        totalPredatorsCreated++;
     }
 
     public void clearAll() {
@@ -219,5 +345,23 @@ public class World {
 
     public void setCursorMode(CursorMode mode) {
         this.currentMode = mode;
+    }
+
+    // ---- Statistics getters ----
+
+    public int getTotalBoidsCreated() {
+        return totalBoidsCreated;
+    }
+
+    public int getTotalBoidsEaten() {
+        return totalBoidsEaten;
+    }
+
+    public int getTotalPredatorsCreated() {
+        return totalPredatorsCreated;
+    }
+
+    public int getTotalPredatorsDiedOfHunger() {
+        return totalPredatorsDiedOfHunger;
     }
 }

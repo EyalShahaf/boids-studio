@@ -56,6 +56,7 @@ public class BoidRenderer {
         // Life bars drawn after triangles so they render on top
         if (showLifeBars) {
             drawBoidLifeBars(shapeRenderer, boids, config, boidSize);
+            drawPredatorLifeBars(shapeRenderer, predators, config, predatorSize);
         }
 
         shapeRenderer.end();
@@ -115,6 +116,44 @@ public class BoidRenderer {
         float y3 = y + sin3 * size;
 
         sr.triangle(x1, y1, x2, y2, x3, y3);
+    }
+
+    /**
+     * Draws hunger and stamina bars above each predator (always visible when showLifeBars is on).
+     * Hunger bar: green (full) → red (empty). Stamina bar: white → dark.
+     */
+    private void drawPredatorLifeBars(ShapeRenderer sr, List<Predator> predators,
+            SimulationConfig config, float predatorSize) {
+        float barWidth = 20f;
+        float hungerBarHeight = 3f;
+        float staminaBarHeight = 2f;
+        float gap = 2f;
+        float baseY = predatorSize * 1.5f + 4f;
+
+        for (int i = 0; i < predators.size(); i++) {
+            Predator predator = predators.get(i);
+            float px = predator.getPosition().x() - barWidth / 2f;
+            float py = predator.getPosition().y() + baseY;
+
+            float hungerFraction = predator.getHunger() / config.predatorHungerMax;
+            float staminaFraction = predator.getStamina() / config.predatorStaminaMax;
+
+            // Hunger bar background
+            sr.setColor(0.2f, 0.2f, 0.2f, 0.8f);
+            sr.rect(px, py, barWidth, hungerBarHeight);
+            // Hunger bar fill: green → red
+            sr.setColor(1f - hungerFraction, hungerFraction, 0f, 1f);
+            sr.rect(px, py, barWidth * hungerFraction, hungerBarHeight);
+
+            float staminaY = py + hungerBarHeight + gap;
+
+            // Stamina bar background
+            sr.setColor(0.2f, 0.2f, 0.2f, 0.8f);
+            sr.rect(px, staminaY, barWidth, staminaBarHeight);
+            // Stamina bar fill: white → dark gray
+            sr.setColor(staminaFraction, staminaFraction, staminaFraction, 1f);
+            sr.rect(px, staminaY, barWidth * staminaFraction, staminaBarHeight);
+        }
     }
 
     public boolean isShowLifeBars() {

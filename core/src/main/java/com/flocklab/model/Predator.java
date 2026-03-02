@@ -2,17 +2,31 @@ package com.flocklab.model;
 
 /**
  * Predator entity that chases boids, causing them to flee.
- * Similar to a boid but uses its own speed limitation and logic.
+ * Has stamina (for sprinting) and hunger (starves to death without eating).
  */
 public class Predator {
+    private final int id;
     private Vec2 position;
     private Vec2 velocity;
     private float maxSpeed;
 
-    public Predator(Vec2 position, Vec2 velocity, float maxSpeed) {
+    private float stamina;
+    private float hunger;
+    private boolean isSprinting;
+
+    public Predator(int id, Vec2 position, Vec2 velocity, float maxSpeed,
+            float initialStamina, float initialHunger) {
+        this.id = id;
         this.position = position;
         this.velocity = velocity;
         this.maxSpeed = maxSpeed;
+        this.stamina = initialStamina;
+        this.hunger = initialHunger;
+        this.isSprinting = false;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public Vec2 getPosition() {
@@ -39,22 +53,50 @@ public class Predator {
         this.maxSpeed = maxSpeed;
     }
 
+    public float getStamina() {
+        return stamina;
+    }
+
+    public void setStamina(float stamina) {
+        this.stamina = stamina;
+    }
+
+    public float getHunger() {
+        return hunger;
+    }
+
+    public void setHunger(float hunger) {
+        this.hunger = hunger;
+    }
+
+    public boolean isSprinting() {
+        return isSprinting;
+    }
+
+    public void setSprinting(boolean sprinting) {
+        this.isSprinting = sprinting;
+    }
+
     /**
-     * Updates predator position based on given steering force.
-     * Wraps around edges similar to boids.
+     * Updates predator position based on a given steering force, applying a sprint
+     * speed multiplier when isSprinting is true.
      */
-    public void update(Vec2 steeringForce, float deltaTime, float worldWidth, float worldHeight) {
-        // Apply steering to velocity
+    public void update(Vec2 steeringForce, float deltaTime, float sprintMultiplier,
+            float worldWidth, float worldHeight) {
         velocity = velocity.add(steeringForce.scale(deltaTime));
 
-        // Limit speed
-        velocity = velocity.limit(maxSpeed);
+        float effectiveMax = isSprinting ? maxSpeed * sprintMultiplier : maxSpeed;
+        velocity = velocity.limit(effectiveMax);
 
-        // Apply velocity to position
         position = position.add(velocity.scale(deltaTime));
-
-        // Wrap edges
         wrapEdges(worldWidth, worldHeight);
+    }
+
+    /**
+     * Legacy update without sprint multiplier (used internally when no sprint is active).
+     */
+    public void update(Vec2 steeringForce, float deltaTime, float worldWidth, float worldHeight) {
+        update(steeringForce, deltaTime, 1.0f, worldWidth, worldHeight);
     }
 
     private void wrapEdges(float worldWidth, float worldHeight) {

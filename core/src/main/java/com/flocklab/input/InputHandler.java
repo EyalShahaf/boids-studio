@@ -9,7 +9,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.flocklab.model.Attractor;
 import com.flocklab.model.Obstacle;
-import com.flocklab.model.Predator;
 import com.flocklab.model.Vec2;
 import com.flocklab.sim.World;
 
@@ -92,7 +91,7 @@ public class InputHandler extends InputAdapter {
                 world.addAttractor(new Attractor(worldPos, 100f));
                 break;
             case PREDATOR:
-                world.addPredator(new Predator(worldPos, Vec2.ZERO, world.getConfig().maxSpeed * 1.5f));
+                world.spawnPredator(worldPos);
                 break;
         }
         return true;
