@@ -1,9 +1,5 @@
-# Boids Studio 🐦
-
-### Interactive Flocking Simulation — Desktop & Web
-
 <div align="center">
-  <img src="images/banner.png" alt="Boids Studio" width="100%">
+  <img src="images/readme-hero.png" alt="Boids Studio — Real-time Flocking Simulation" width="100%">
 </div>
 
 <div align="center">
@@ -294,3 +290,9 @@ MIT — see [LICENSE](LICENSE)
 ## 👤 Author
 
 **Eyal Shahaf** — [GitHub](https://github.com/EyalShahaf/boids-studio)
+
+---
+
+<div align="center">
+  <img src="images/banner.png" alt="" width="100%">
+</div>
