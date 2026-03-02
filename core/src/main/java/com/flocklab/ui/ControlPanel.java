@@ -113,10 +113,24 @@ public class ControlPanel {
             }
         });
 
+        final boolean[] lifeBarsOn = { game.getWorldRenderer().getBoidRenderer().isShowLifeBars() };
+        final TextButton lifeBarsBtn = new TextButton(lifeBarsOn[0] ? "Life Bars: ON" : "Life Bars: OFF", skin);
+        lifeBarsBtn.setColor(lifeBarsOn[0] ? Color.CYAN : Color.WHITE);
+        lifeBarsBtn.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                lifeBarsOn[0] = !lifeBarsOn[0];
+                game.getWorldRenderer().getBoidRenderer().setShowLifeBars(lifeBarsOn[0]);
+                lifeBarsBtn.setText(lifeBarsOn[0] ? "Life Bars: ON" : "Life Bars: OFF");
+                lifeBarsBtn.setColor(lifeBarsOn[0] ? Color.CYAN : Color.WHITE);
+            }
+        });
+
         Table topButtons = new Table();
         topButtons.add(pauseBtn).width(90).padRight(5);
         topButtons.add(clearBtn).width(90);
-        panel.add(topButtons).padBottom(15).row();
+        panel.add(topButtons).padBottom(5).row();
+        panel.add(lifeBarsBtn).fillX().height(30).padBottom(15).row();
 
         // --- Sliders ---
         addSliderRow(panel, "Max Speed", 10f, 400f, 1f, () -> cfg.maxSpeed, val -> cfg.maxSpeed = val);

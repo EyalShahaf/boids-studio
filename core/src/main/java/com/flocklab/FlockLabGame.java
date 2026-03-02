@@ -133,6 +133,10 @@ public class FlockLabGame extends ApplicationAdapter {
         return isPaused;
     }
 
+    public WorldRenderer getWorldRenderer() {
+        return worldRenderer;
+    }
+
     @Override
     public void dispose() {
         worldRenderer.dispose();
