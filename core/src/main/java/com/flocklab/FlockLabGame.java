@@ -62,12 +62,10 @@ public class FlockLabGame extends ApplicationAdapter {
         Table mainArea = new Table();
         root.add(mainArea).expand().fill();
 
-        // Spacer to push footer down
+        // Footer in mainArea - use a spacer to push it to the bottom
         mainArea.add().expand().fill().row();
 
-        // Footer in mainArea
         Table footer = new Table();
-        footer.bottom();
         TextButton creditBtn = new TextButton("Developed by Eyal Shahaf", skin);
         creditBtn.addListener(new ChangeListener() {
             @Override

@@ -58,6 +58,10 @@ public class ControlPanel {
         toggleBtn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                // Ensure we only trigger when the toggle button itself is the source
+                if (event.getTarget() != toggleBtn)
+                    return;
+
                 isRetracted = !isRetracted;
                 panel.setVisible(!isRetracted);
                 toggleBtn.setText(isRetracted ? "<" : ">");
