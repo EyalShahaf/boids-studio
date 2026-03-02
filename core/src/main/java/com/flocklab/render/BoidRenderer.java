@@ -10,25 +10,27 @@ import java.util.List;
 /**
  * Responsible for rendering boids and predators as oriented triangles.
  * Uses level-of-detail (LOD) to reduce geometry at high boid counts.
+ * Both boid and predator sizes are derived from a shared LOD scale so they
+ * always remain proportional (predator = 2× boid at every LOD level).
  */
 public class BoidRenderer {
 
     public Color boidColor = new Color(0.2f, 0.7f, 0.9f, 1f);
     public Color predatorColor = new Color(0.9f, 0.2f, 0.2f, 1f);
 
-    private static final float BOID_SIZE_NORMAL = 6f;
-    private static final float BOID_SIZE_MEDIUM = 4f;
-    private static final float BOID_SIZE_SMALL = 3f;
-    private static final float PREDATOR_SIZE = 12f;
+    private static final float BOID_BASE_SIZE = 6f;
+    private static final float PREDATOR_BASE_SIZE = 12f;
 
     private static final int LOD_MEDIUM_THRESHOLD = 1000;
     private static final int LOD_SMALL_THRESHOLD = 1500;
 
+    private boolean showLifeBars = true;
+
     public void render(ShapeRenderer shapeRenderer, List<Boid> boids, List<Predator> predators) {
         int boidCount = boids.size();
-        float boidSize = boidCount >= LOD_SMALL_THRESHOLD ? BOID_SIZE_SMALL
-                : boidCount >= LOD_MEDIUM_THRESHOLD ? BOID_SIZE_MEDIUM
-                : BOID_SIZE_NORMAL;
+        float lodScale = computeLodScale(boidCount);
+        float boidSize = BOID_BASE_SIZE * lodScale;
+        float predatorSize = PREDATOR_BASE_SIZE * lodScale;
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
@@ -46,10 +48,21 @@ public class BoidRenderer {
         for (int i = 0; i < predators.size(); i++) {
             Predator predator = predators.get(i);
             drawOrientedTriangle(shapeRenderer, predator.getPosition().x(), predator.getPosition().y(),
-                    predator.getVelocity().angle(), PREDATOR_SIZE);
+                    predator.getVelocity().angle(), predatorSize);
         }
 
         shapeRenderer.end();
+    }
+
+    /**
+     * Returns a LOD scale factor based on boid count.
+     * Both boid and predator base sizes are multiplied by this value so they
+     * always stay proportional to each other.
+     */
+    private float computeLodScale(int boidCount) {
+        if (boidCount >= LOD_SMALL_THRESHOLD) return 0.5f;
+        if (boidCount >= LOD_MEDIUM_THRESHOLD) return 0.66f;
+        return 1.0f;
     }
 
     private void drawOrientedTriangle(ShapeRenderer sr, float x, float y, float angleRad, float size) {
@@ -70,5 +83,13 @@ public class BoidRenderer {
         float y3 = y + sin3 * size;
 
         sr.triangle(x1, y1, x2, y2, x3, y3);
+    }
+
+    public boolean isShowLifeBars() {
+        return showLifeBars;
+    }
+
+    public void setShowLifeBars(boolean showLifeBars) {
+        this.showLifeBars = showLifeBars;
     }
 }
