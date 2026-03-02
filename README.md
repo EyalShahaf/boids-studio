@@ -21,13 +21,14 @@ Flock Lab implements the classic flocking algorithm and extends it with real-tim
 
 ## 📌 Project Status
 
-**All 12 / 12 Steps Complete!** 🎉
+**Performance-optimized for 1000–2000+ boids in browser!** 🚀
 
 - ✅ **Core Physics & Simulation:** Domain models (`Vec2`, `Boid`), flocking rules, spatial grids.
 - ✅ **Desktop & Web Builds:** Runs locally via LWJGL3 and in browser via GWT/HTML.
 - ✅ **Interactive UI Controls:** Real-time property tweaking with Scene2D sliders & HUD.
 - ✅ **Visual Polish:** Dynamic HSL coloring, additive blending, and fading motion trails.
 - ✅ **CI Pipeline:** Automated builds and GitHub Pages deployment via GitHub Actions.
+- ✅ **Performance Overhaul:** Full three-phase optimization pass (see below).
 
 ------------------------------------------------------------------------
 
@@ -174,6 +175,55 @@ Run tests:
 Flock Lab was built as: - A deep dive into emergent behavior
 simulation - A clean architecture exercise - A Java game-dev
 exploration - A browser-deployable interactive experiment
+
+------------------------------------------------------------------------
+
+## ⚡ Performance Optimizations
+
+To break the ~1000 boid limit in the browser, three phases of optimization
+were applied:
+
+### Phase 1 — Simulation lifecycle fixes
+- **Spatial grid reuse:** `SpatialGrid` is now cleared and reused each frame instead of being
+  re-instantiated, eliminating a full `HashMap` allocation per frame. The grid is only recreated
+  when the perception radius or world dimensions change.
+- **Perception radius caching:** `perceptionRadius` and `perceptionRadius²` are computed once
+  per `World.update` call and threaded through all rule calculations.
+- **UI update throttling:** `ControlPanel` and `StatsOverlay` label updates are throttled to
+  ~8 Hz instead of 60 Hz, eliminating ~52 string allocations per second per label.
+
+### Phase 2 — Hot-loop allocation elimination
+- **Single-pass flock rule:** `BoidRules.flock()` combines separation, alignment, and cohesion
+  in one neighbor iteration instead of three, cutting loop overhead by 3×.
+- **Raw float accumulation:** The inner loop uses `float` math throughout and creates exactly
+  one `Vec2` per boid per frame (the combined force), down from 4+ Vec2s per neighbor. With
+  1000 boids and ~20 neighbors each this eliminates ~80,000 short-lived allocations per frame.
+- **No-sqrt separation:** `diff.normalize().scale(500/d)` reduces to `diff * 500/d²`, removing
+  a `Math.sqrt` call per in-range neighbor.
+- **Neighbor buffer reuse:** A single `ArrayList<Boid>` is pre-allocated per `World` and cleared
+  before each boid's spatial query, eliminating 1000+ `ArrayList` allocations per frame.
+- **Pre-allocated predator proxy:** The temporary `Boid(-1, ...)` created per predator per frame
+  is replaced with a single pre-allocated proxy whose position is updated in-place.
+- **Index-based list iteration:** All hot-path list traversals use index loops to avoid
+  `Iterator` allocation overhead.
+
+### Phase 3 — Adaptive rendering
+- **Trail adaptive quality:** Trails automatically reduce length at 600+ boids, shorten
+  further at 1000+, and disable entirely at 1500+ boids.
+- **Trail decimation:** At 1000+ boids, every second trail segment is skipped, halving
+  line draw calls.
+- **Trail ring buffer:** `LinkedList<Vec2>` replaced with `ArrayDeque<Vec2>` for better
+  cache locality and no per-node allocation.
+- **LOD boid rendering:** Boid triangle size scales down from 6px → 4px → 3px at 1000 and
+  1500 boid thresholds, slightly reducing fragment fill rate.
+- **Min-speed clamp removed:** The 20%-of-maxSpeed velocity floor was causing incorrect
+  edge-wrapping behavior and has been removed; boids now only enforce a maximum speed.
+
+### Expected results
+| Target | Boid count |
+|--------|-----------|
+| 60 FPS | 800–1200 (trails adaptive) |
+| 30+ FPS | 1500–2000+ (trails disabled) |
 
 ------------------------------------------------------------------------
 

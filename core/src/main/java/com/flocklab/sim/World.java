@@ -31,70 +31,81 @@ public class World {
     private SpatialGrid spatialGrid;
     private int nextBoidId = 0;
 
+    /** Reusable neighbor buffer — avoids a new ArrayList allocation per boid per frame. */
+    private final List<Boid> neighborBuffer = new ArrayList<>();
+
+    /** Pre-allocated proxy boid used for predator spatial queries. */
+    private final Boid predatorProxy = new Boid(-1, Vec2.ZERO, Vec2.ZERO);
+
     public World(SimulationConfig config) {
         this.config = config;
-        this.spatialGrid = new SpatialGrid(Math.max(config.perceptionRadius, 50f), config.worldWidth,
-                config.worldHeight);
+        this.spatialGrid = createGrid();
 
-        // Spawn initial boids
         for (int i = 0; i < config.initialBoidCount; i++) {
             float x = (float) (Math.random() * config.worldWidth);
             float y = (float) (Math.random() * config.worldHeight);
             float vx = (float) (Math.random() * 2 - 1);
             float vy = (float) (Math.random() * 2 - 1);
-
             boids.add(new Boid(nextBoidId++, new Vec2(x, y), new Vec2(vx, vy).setMagnitude(config.maxSpeed)));
         }
     }
 
     public void update(float deltaTime) {
-        // Dynamic grid cell sizing based on perception radius
+        ensureGridMatchesConfig();
+        spatialGrid.clear();
+
+        for (int i = 0; i < boids.size(); i++) {
+            spatialGrid.insert(boids.get(i));
+        }
+
+        float perceptionRadius = config.perceptionRadius;
+        float perceptionRadiusSq = perceptionRadius * perceptionRadius;
+        float worldWidth = config.worldWidth;
+        float worldHeight = config.worldHeight;
+
+        for (int i = 0; i < boids.size(); i++) {
+            Boid boid = boids.get(i);
+            spatialGrid.getNeighborsInto(boid, perceptionRadius, neighborBuffer);
+
+            Vec2 flockForce = BoidRules.flock(boid, neighborBuffer, perceptionRadiusSq,
+                    config.separationWeight, config.alignmentWeight, config.cohesionWeight);
+
+            boid.applyForce(flockForce);
+            boid.applyForce(BoidRules.avoidObstacles(boid, obstacles, perceptionRadius)
+                    .scale(config.obstacleAvoidanceWeight));
+            boid.applyForce(BoidRules.fleePredators(boid, predators, perceptionRadius)
+                    .scale(config.predatorFleeWeight));
+            boid.applyForce(BoidRules.seekAttractors(boid, attractors, perceptionRadius)
+                    .scale(config.foodAttractionWeight));
+        }
+
+        for (int i = 0; i < boids.size(); i++) {
+            boids.get(i).update(deltaTime, config.maxSpeed, worldWidth, worldHeight);
+        }
+
+        if (!predators.isEmpty()) {
+            float predatorRadius = perceptionRadius * 2f;
+            float predatorRadiusSq = predatorRadius * predatorRadius;
+            for (int i = 0; i < predators.size(); i++) {
+                Predator predator = predators.get(i);
+                predatorProxy.setPosition(predator.getPosition());
+                spatialGrid.getNeighborsInto(predatorProxy, predatorRadius, neighborBuffer);
+                Vec2 chase = BoidRules.cohesionSquaredRadius(predatorProxy, neighborBuffer, predatorRadiusSq);
+                predator.update(chase, deltaTime, worldWidth, worldHeight);
+            }
+        }
+    }
+
+    private SpatialGrid createGrid() {
+        return new SpatialGrid(Math.max(config.perceptionRadius, 50f), config.worldWidth, config.worldHeight);
+    }
+
+    private void ensureGridMatchesConfig() {
         float requiredCellSize = Math.max(config.perceptionRadius, 50f);
-        spatialGrid = new SpatialGrid(requiredCellSize, config.worldWidth, config.worldHeight);
-
-        for (Boid b : boids) {
-            spatialGrid.insert(b);
-        }
-
-        for (Boid boid : boids) {
-            List<Boid> neighbors = spatialGrid.getNeighbors(boid, config.perceptionRadius);
-
-            // Calculate steerings
-            Vec2 separation = BoidRules.separation(boid, neighbors, config.perceptionRadius)
-                    .scale(config.separationWeight);
-            Vec2 alignment = BoidRules.alignment(boid, neighbors, config.perceptionRadius)
-                    .scale(config.alignmentWeight);
-            Vec2 cohesion = BoidRules.cohesion(boid, neighbors, config.perceptionRadius).scale(config.cohesionWeight);
-
-            Vec2 avoidObs = BoidRules.avoidObstacles(boid, obstacles, config.perceptionRadius)
-                    .scale(config.obstacleAvoidanceWeight);
-            Vec2 fleePreds = BoidRules.fleePredators(boid, predators, config.perceptionRadius)
-                    .scale(config.predatorFleeWeight);
-            Vec2 seekAttr = BoidRules.seekAttractors(boid, attractors, config.perceptionRadius)
-                    .scale(config.foodAttractionWeight);
-
-            // Accumulate forces
-            boid.applyForce(separation);
-            boid.applyForce(alignment);
-            boid.applyForce(cohesion);
-            boid.applyForce(avoidObs);
-            boid.applyForce(fleePreds);
-            boid.applyForce(seekAttr);
-        }
-
-        // Apply physics
-        for (Boid b : boids) {
-            b.update(deltaTime, config.maxSpeed, config.worldWidth, config.worldHeight);
-        }
-
-        // Update predators
-        for (Predator p : predators) {
-            // Very simple predator AI: chase center of mass of boids nearby
-            List<Boid> nearby = spatialGrid.getNeighbors(new Boid(-1, p.getPosition(), Vec2.ZERO),
-                    config.perceptionRadius * 2);
-            Vec2 chase = BoidRules.cohesion(new Boid(-1, p.getPosition(), Vec2.ZERO), nearby,
-                    config.perceptionRadius * 2);
-            p.update(chase, deltaTime, config.worldWidth, config.worldHeight);
+        if (Math.abs(spatialGrid.getCellSize() - requiredCellSize) > 0.0001f
+                || spatialGrid.getCols() != (int) Math.ceil(config.worldWidth / requiredCellSize)
+                || spatialGrid.getRows() != (int) Math.ceil(config.worldHeight / requiredCellSize)) {
+            spatialGrid = createGrid();
         }
     }
 

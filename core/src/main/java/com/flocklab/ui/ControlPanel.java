@@ -38,6 +38,9 @@ public class ControlPanel {
     private final List<Runnable> uiSyncers = new ArrayList<>();
     private final List<TextButton> toolButtons = new ArrayList<>();
 
+    private float uiUpdateTimer = 0f;
+    private static final float UI_UPDATE_INTERVAL = 0.125f; // ~8 Hz
+
     public ControlPanel(Table root, Stage stage, Skin skin, World world, FlockLabGame game) {
         this.stage = stage;
         this.world = world;
@@ -223,9 +226,13 @@ public class ControlPanel {
         panel.add(row).padBottom(5).row();
     }
 
-    public void update() {
-        if (boidCountLabel != null) {
-            boidCountLabel.setText("Count: " + world.getBoids().size());
+    public void update(float deltaTime) {
+        uiUpdateTimer += deltaTime;
+        if (uiUpdateTimer >= UI_UPDATE_INTERVAL) {
+            uiUpdateTimer = 0f;
+            if (boidCountLabel != null) {
+                boidCountLabel.setText("Count: " + world.getBoids().size());
+            }
         }
     }
 

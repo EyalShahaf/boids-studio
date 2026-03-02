@@ -95,18 +95,18 @@ public class FlockLabGame extends ApplicationAdapter {
 
     @Override
     public void render() {
+        float rawDelta = Gdx.graphics.getDeltaTime();
+
         // 1. Logic Update
         if (!isPaused) {
-            float deltaTime = Gdx.graphics.getDeltaTime();
-            if (deltaTime > 0.1f)
-                deltaTime = 0.1f;
+            float deltaTime = Math.min(rawDelta, 0.1f);
             world.update(deltaTime);
         }
 
-        // Update UI logic
-        controlPanel.update();
-        statsOverlay.update();
-        stage.act(Gdx.graphics.getDeltaTime());
+        // Update UI logic (throttled to ~8 Hz to reduce string allocation pressure)
+        controlPanel.update(rawDelta);
+        statsOverlay.update(rawDelta);
+        stage.act(rawDelta);
 
         // 2. Rendering
         Gdx.gl.glClearColor(0f, 0f, 0f, 1f);

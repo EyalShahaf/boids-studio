@@ -8,21 +8,31 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Spatial partitioning grid for fast O(1) neighboring boid lookup.
- * Rebuilt every frame to avoid O(N^2) checks for large boid counts.
+ * Spatial partitioning grid for fast neighboring boid lookup.
+ * Reused across frames — call clear() then insert all boids each frame.
  */
 public class SpatialGrid {
     private final float cellSize;
     private final Map<Integer, List<Boid>> grid = new HashMap<>();
-    private final float worldWidth;
-    private final float worldHeight;
     private final int cols;
+    private final int rows;
 
     public SpatialGrid(float cellSize, float worldWidth, float worldHeight) {
         this.cellSize = cellSize;
-        this.worldWidth = worldWidth;
-        this.worldHeight = worldHeight;
         this.cols = (int) Math.ceil(worldWidth / cellSize);
+        this.rows = (int) Math.ceil(worldHeight / cellSize);
+    }
+
+    public float getCellSize() {
+        return cellSize;
+    }
+
+    public int getCols() {
+        return cols;
+    }
+
+    public int getRows() {
+        return rows;
     }
 
     public void clear() {
@@ -34,56 +44,58 @@ public class SpatialGrid {
         grid.computeIfAbsent(cellHash, k -> new ArrayList<>()).add(boid);
     }
 
-    public List<Boid> getNeighbors(Boid boid, float radius) {
-        List<Boid> neighbors = new ArrayList<>();
+    /**
+     * Clears neighborsOut then populates it with all boids in the 3×3 cell
+     * neighborhood surrounding the given boid.
+     */
+    public void getNeighborsInto(Boid boid, float radius, List<Boid> neighborsOut) {
+        neighborsOut.clear();
         int cellX = (int) (boid.getPosition().x() / cellSize);
         int cellY = (int) (boid.getPosition().y() / cellSize);
 
-        // Search 3x3 surrounding cells to cover the radius
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
-                // Handle edge wrapping for spatial queries
-                int checkX = cellX + i;
-                int checkY = cellY + j;
-
-                // Wrap logic for grid bounds
-                if (checkX < 0)
-                    checkX += cols;
-                else if (checkX >= cols)
-                    checkX -= cols;
-
-                int rows = (int) Math.ceil(worldHeight / cellSize);
-                if (checkY < 0)
-                    checkY += rows;
-                else if (checkY >= rows)
-                    checkY -= rows;
-
-                int hash = checkX + checkY * cols;
+                int hash = wrapCellX(cellX + i) + wrapCellY(cellY + j) * cols;
                 List<Boid> cellBoids = grid.get(hash);
                 if (cellBoids != null) {
-                    neighbors.addAll(cellBoids);
+                    neighborsOut.addAll(cellBoids);
                 }
             }
         }
+    }
+
+    /** Convenience wrapper that allocates a new list. Prefer getNeighborsInto for hot paths. */
+    public List<Boid> getNeighbors(Boid boid, float radius) {
+        List<Boid> neighbors = new ArrayList<>();
+        getNeighborsInto(boid, radius, neighbors);
         return neighbors;
     }
 
     private int getCellHash(float x, float y) {
-        int cx = (int) (x / cellSize);
-        int cy = (int) (y / cellSize);
+        return clampCellX((int) (x / cellSize)) + clampCellY((int) (y / cellSize)) * cols;
+    }
 
-        // Clamp bounds just in case wrapping hasn't occurred exactly
-        if (cx < 0)
-            cx = 0;
-        else if (cx >= cols)
-            cx = cols - 1;
+    private int wrapCellX(int x) {
+        if (x < 0) return x + cols;
+        if (x >= cols) return x - cols;
+        return x;
+    }
 
-        int rows = (int) Math.ceil(worldHeight / cellSize);
-        if (cy < 0)
-            cy = 0;
-        else if (cy >= rows)
-            cy = rows - 1;
+    private int wrapCellY(int y) {
+        if (y < 0) return y + rows;
+        if (y >= rows) return y - rows;
+        return y;
+    }
 
-        return cx + cy * cols;
+    private int clampCellX(int x) {
+        if (x < 0) return 0;
+        if (x >= cols) return cols - 1;
+        return x;
+    }
+
+    private int clampCellY(int y) {
+        if (y < 0) return 0;
+        if (y >= rows) return rows - 1;
+        return y;
     }
 }

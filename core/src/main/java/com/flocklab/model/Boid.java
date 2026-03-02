@@ -51,12 +51,9 @@ public class Boid {
         // Apply acceleration to velocity
         velocity = velocity.add(acceleration.scale(deltaTime));
 
-        // Enforce minimum and maximum speed
+        // Enforce maximum speed
         float speed = velocity.magnitude();
-        float minSpeed = maxSpeed * 0.2f; // Minimum 20% of max speed
-        if (speed < minSpeed && speed > 0.001f) {
-            velocity = velocity.setMagnitude(minSpeed);
-        } else if (speed > maxSpeed) {
+        if (speed > maxSpeed) {
             velocity = velocity.setMagnitude(maxSpeed);
         }
 
