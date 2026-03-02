@@ -1,4 +1,4 @@
-rootProject.name = 'flock-lab'
+rootProject.name = 'boids-studio'
 
 include 'core'
 include 'lwjgl3'

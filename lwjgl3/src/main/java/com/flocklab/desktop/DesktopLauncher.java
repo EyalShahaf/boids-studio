@@ -8,7 +8,7 @@ public class DesktopLauncher {
 
     public static void main(String[] args) {
         var config = new Lwjgl3ApplicationConfiguration();
-        config.setTitle("Flock Lab");
+        config.setTitle("Boids Studio");
         config.setWindowedMode(1280, 720);
         config.useVsync(true);
         config.setForegroundFPS(0); // 0 means no limit (will be throttled by VSync if true)

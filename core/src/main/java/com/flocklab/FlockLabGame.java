@@ -66,7 +66,7 @@ public class FlockLabGame extends ApplicationAdapter {
         mainArea.add().expand().fill().row();
 
         Table footer = new Table();
-        TextButton creditBtn = new TextButton("Developed by Eyal Shahaf", skin);
+        TextButton creditBtn = new TextButton("Developed by Eyal Shahaf  |  Version " + AppVersion.VERSION, skin);
         creditBtn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {

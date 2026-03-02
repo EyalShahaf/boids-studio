@@ -1,9 +1,9 @@
-# Flock Lab 🐦
+# Boids Studio 🐦
 
 ### Modern Java Boids Simulation --- Desktop + Web
 
 <div align="center">
-  <img src="images/banner.png" alt="Flock Lab Boids Simulation" width="100%">
+  <img src="images/banner.png" alt="Boids Studio — Boids Simulation" width="100%">
 </div>
 
 ![Java](https://img.shields.io/badge/Java-21-blue?style=for-the-badge&logo=openjdk&logoColor=white)
@@ -15,7 +15,7 @@
 
 An interactive **Boids (flocking) simulation** built with modern **Java 21** and **LibGDX**, designed as a clean-architecture, portfolio-grade hobby project.
 
-Flock Lab implements the classic flocking algorithm and extends it with real-time configuration, predator-prey mechanics, obstacle avoidance, and browser deployment.
+Boids Studio implements the classic flocking algorithm and extends it with real-time configuration, predator-prey mechanics, obstacle avoidance, and browser deployment.
 
 ---
 
@@ -69,7 +69,7 @@ Each boid follows three simple rules:
 
 From these simple rules, complex emergent swarm behavior appears.
 
-Flock Lab extends this model with:
+Boids Studio extends this model with:
 
 -   Environmental obstacles
 -   Predator avoidance
@@ -172,7 +172,7 @@ Run tests:
 
 ## 📚 Why This Project?
 
-Flock Lab was built as: - A deep dive into emergent behavior
+Boids Studio was built as: - A deep dive into emergent behavior
 simulation - A clean architecture exercise - A Java game-dev
 exploration - A browser-deployable interactive experiment
 

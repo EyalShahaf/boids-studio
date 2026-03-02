@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.flocklab.AppVersion;
 import com.flocklab.FlockLabGame;
 import com.flocklab.config.Preset;
 import com.flocklab.config.SimulationConfig;
@@ -22,7 +23,7 @@ import java.util.List;
 
 /**
  * Side panel for controlling simulation parameters in real-time.
- * Now supports retraction and tool selection.
+ * Supports retraction and tool selection.
  */
 public class ControlPanel {
     private final Stage stage;
@@ -32,9 +33,11 @@ public class ControlPanel {
 
     private final Table panel;
     private final Cell<Table> panelCell;
+    private Cell<Table> innerPanelCell;
     private boolean isRetracted = false;
 
     private Label boidCountLabel;
+    private Label predatorCountLabel;
     private final List<Runnable> uiSyncers = new ArrayList<>();
     private final List<TextButton> toolButtons = new ArrayList<>();
 
@@ -47,7 +50,7 @@ public class ControlPanel {
         this.game = game;
         this.skin = skin;
 
-        // Container for the panel and the toggle button
+        // Container: panel on the left, toggle button flush against the screen's right edge
         Table container = new Table();
         panelCell = root.add(container).width(250).expandY().fillY();
 
@@ -56,31 +59,32 @@ public class ControlPanel {
         panel.pad(15);
         buildPanel(panel);
 
-        // Retract/Expand button
-        final TextButton toggleBtn = new TextButton(">", skin);
+        // Toggle button is placed AFTER the panel so it always sits at the screen edge
+        final TextButton toggleBtn = new TextButton("<", skin);
         toggleBtn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                // Ensure we only trigger when the toggle button itself is the source
-                if (event.getTarget() != toggleBtn)
-                    return;
+                if (event.getTarget() != toggleBtn) return;
 
                 isRetracted = !isRetracted;
                 panel.setVisible(!isRetracted);
-                toggleBtn.setText(isRetracted ? "<" : ">");
+                toggleBtn.setText(isRetracted ? ">" : "<");
+                // Collapse / restore the panel cell width so the toggle stays at screen edge
+                innerPanelCell.width(isRetracted ? 0 : 210).minWidth(0);
                 panelCell.width(isRetracted ? 40 : 250);
                 root.invalidateHierarchy();
             }
         });
 
+        // Panel first (left), toggle last (right / screen edge)
+        innerPanelCell = container.add(panel).width(210).expandY().fillY();
         container.add(toggleBtn).width(40).expandY().fillY();
-        container.add(panel).expand().fill();
     }
 
     private void buildPanel(Table panel) {
         SimulationConfig cfg = world.getConfig();
 
-        panel.add(new Label("FLOCK LAB", skin)).padBottom(15).row();
+        panel.add(new Label("Boids Studio", skin)).padBottom(15).row();
 
         // --- Tools ---
         panel.add(new Label("--- Tools ---", skin)).padBottom(10).row();
@@ -144,8 +148,10 @@ public class ControlPanel {
 
         // --- Info ---
         panel.add(new Label("--- Info ---", skin)).padTop(10).padBottom(5).row();
-        boidCountLabel = new Label("Count: " + world.getBoids().size(), skin);
-        panel.add(boidCountLabel).left().padBottom(10).row();
+        boidCountLabel = new Label("Boids Count: " + world.getBoids().size(), skin);
+        panel.add(boidCountLabel).left().padBottom(3).row();
+        predatorCountLabel = new Label("Predators: " + world.getPredators().size(), skin);
+        panel.add(predatorCountLabel).left().padBottom(10).row();
 
         // --- Project Details ---
         TextButton detailsBtn = new TextButton("Project Details", skin);
@@ -186,6 +192,7 @@ public class ControlPanel {
         Table content = dialog.getContentTable();
         content.left();
         content.add(new Label("Developed by: Eyal Shahaf", skin)).left().row();
+        content.add(new Label("Version: " + AppVersion.VERSION, skin)).left().padBottom(5).row();
         content.add(new Label("Interactive Simulation", skin)).left().row();
         content.add(new Label("Controls:", skin)).padTop(10).left().row();
         content.add(new Label("- Left Click: Use selected tool", skin)).left().row();
@@ -231,7 +238,10 @@ public class ControlPanel {
         if (uiUpdateTimer >= UI_UPDATE_INTERVAL) {
             uiUpdateTimer = 0f;
             if (boidCountLabel != null) {
-                boidCountLabel.setText("Count: " + world.getBoids().size());
+                boidCountLabel.setText("Boids Count: " + world.getBoids().size());
+            }
+            if (predatorCountLabel != null) {
+                predatorCountLabel.setText("Predators: " + world.getPredators().size());
             }
         }
     }

@@ -8,3 +8,33 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+def generatedVersionDir = "${buildDir}/generated-src/version"
+
+task generateVersion {
+    outputs.dir(generatedVersionDir)
+    doLast {
+        def timestamp = new Date().format('yyyyMMddHHmm')
+        def version = "1.0.${timestamp}"
+        def packageDir = new File("${generatedVersionDir}/com/flocklab")
+        packageDir.mkdirs()
+        new File(packageDir, 'AppVersion.java').text = """\
+package com.flocklab;
+
+public final class AppVersion {
+    public static final String VERSION = "${version}";
+    private AppVersion() {}
+}
+"""
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir generatedVersionDir
+        }
+    }
+}
+
+compileJava.dependsOn generateVersion

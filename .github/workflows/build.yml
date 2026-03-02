@@ -26,13 +26,19 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
+    - name: Generate version stamp
+      run: ./gradlew :core:generateVersion
+
+    - name: Log generated version
+      run: cat core/build/generated-src/version/com/flocklab/AppVersion.java
+
     - name: Build Desktop (LWJGL3)
       run: ./gradlew :lwjgl3:build
 
     - name: Build Web (HTML/GWT)
       run: ./gradlew :html:dist
 
-    # Optional: Deploy to GitHub Pages if pushing to main
+    # Deploy to GitHub Pages on every push to main
     - name: Deploy to GitHub Pages
       if: github.ref == 'refs/heads/main'
       uses: peaceiris/actions-gh-pages@v3

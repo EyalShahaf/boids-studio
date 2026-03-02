@@ -16,7 +16,7 @@ allprojects {
     }
 
     ext {
-        appName = 'flock-lab'
+        appName = 'boids-studio'
 
         gdxVersion = '1.13.1'
         gwtVersion = '2.12.1'
