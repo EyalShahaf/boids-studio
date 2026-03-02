@@ -1,245 +1,296 @@
 # Boids Studio 🐦
 
-### Modern Java Boids Simulation --- Desktop + Web
+### Interactive Flocking Simulation — Desktop & Web
 
 <div align="center">
-  <img src="images/banner.png" alt="Boids Studio — Boids Simulation" width="100%">
+  <img src="images/banner.png" alt="Boids Studio" width="100%">
 </div>
 
+<div align="center">
+
 ![Java](https://img.shields.io/badge/Java-21-blue?style=for-the-badge&logo=openjdk&logoColor=white)
-![LibGDX](https://img.shields.io/badge/LibGDX-Latest-red?style=for-the-badge)
+![LibGDX](https://img.shields.io/badge/LibGDX-1.13.1-red?style=for-the-badge)
 [![Live Demo](https://img.shields.io/badge/Live_Demo-Play_Now-green?style=for-the-badge&logo=google-chrome&logoColor=white)](https://eyalshahaf.github.io/boids-studio/)
 ![Gradle](https://img.shields.io/badge/Gradle-8.x-02303A?style=for-the-badge&logo=gradle&logoColor=white)
 ![Platform](https://img.shields.io/badge/platform-Desktop%20%7C%20Web-lightgrey?style=for-the-badge)
 ![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)
 
-An interactive **Boids (flocking) simulation** built with modern **Java 21** and **LibGDX**, designed as a clean-architecture, portfolio-grade hobby project.
+</div>
 
-Boids Studio implements the classic flocking algorithm and extends it with real-time configuration, predator-prey mechanics, obstacle avoidance, and browser deployment.
+An interactive, real-time **flocking simulation** built with **Java 21** and **LibGDX** — running both natively on desktop and directly in the browser via GWT. Boids Studio goes beyond the classic three-rule algorithm with predator-prey dynamics, obstacle avoidance, food attractors, and a fully live-editable parameter set, all while sustaining **2,800+ boids at a steady 60 FPS in-browser**.
+
+---
+
+<div align="center">
+  <img src="images/screenshot-sim.png" alt="2,894 boids at 60 FPS" width="100%">
+  <sub>2,894 boids · 60 FPS · Chrome (GWT/WebGL)</sub>
+</div>
 
 ---
 
 ## 📌 Project Status
 
-**Performance-optimized for 1000–2000+ boids in browser!** 🚀
+> **Verified: 2,800+ boids at 60 FPS in the browser** 🚀
 
-- ✅ **Core Physics & Simulation:** Domain models (`Vec2`, `Boid`), flocking rules, spatial grids.
-- ✅ **Desktop & Web Builds:** Runs locally via LWJGL3 and in browser via GWT/HTML.
-- ✅ **Interactive UI Controls:** Real-time property tweaking with Scene2D sliders & HUD.
-- ✅ **Visual Polish:** Dynamic HSL coloring, additive blending, and fading motion trails.
-- ✅ **CI Pipeline:** Automated builds and GitHub Pages deployment via GitHub Actions.
-- ✅ **Performance Overhaul:** Full three-phase optimization pass (see below).
+| Milestone | Status |
+|---|---|
+| Core physics & simulation (Vec2, Boid, spatial grid) | ✅ Complete |
+| Desktop & web builds (LWJGL3 + GWT) | ✅ Complete |
+| Interactive UI — sliders, tools, presets, HUD | ✅ Complete |
+| Visual polish — HSL color, additive blending, motion trails | ✅ Complete |
+| CI/CD pipeline — GitHub Actions → GitHub Pages auto-deploy | ✅ Complete |
+| Automated versioning — build-timestamped releases | ✅ Complete |
+| Three-phase performance overhaul | ✅ Complete |
 
-------------------------------------------------------------------------
+---
 
 ## ✨ Features
 
 ### 🧠 Core Simulation
 
--   Separation, Alignment, Cohesion (classic Boids rules)
--   Obstacle avoidance
--   Predator behavior
--   Food / attractor mechanics
--   Edge wrapping world
--   Real-time adjustable simulation parameters
+- **Classic Boids** — Separation, Alignment, and Cohesion implemented as a single-pass, allocation-free hot loop
+- **Obstacle Avoidance** — Boids actively steer away from placed circular obstacles
+- **Predator–Prey Dynamics** — Predators actively chase the nearest boid cluster; boids flee when a predator enters their perception radius
+- **Food Attractors** — Place attractor points that boids are drawn toward, creating emergent feeding behavior
+- **Edge Wrapping** — The world is toroidal; boids seamlessly cross any edge and reappear on the opposite side
+- **Spatial Grid Acceleration** — An adaptive spatial hash grid ensures near-O(1) neighbor lookup, making large swarms feasible in real-time
 
-### 🎛 Live Controls
+### 🎨 Visual Rendering
 
-Adjustable at runtime: - Number of boids - Max speed - Perception
-radius - Rule weights (separation / alignment / cohesion / avoidance /
-predator / food)
+- **Dynamic HSL coloring** — Each boid's hue is derived from its heading angle, producing naturally shifting color gradients across the flock
+- **Additive blending** — Overlapping boids brighten rather than occlude, giving dense clusters a vibrant glow effect
+- **Motion trails** — A fading trail follows each boid, reinforcing the sense of speed and fluid motion
+- **Adaptive LOD** — Trail length, trail density, and boid triangle size all scale down automatically as the population grows to maintain framerate
 
-UI includes: - Start / Pause / Reset - Preset configurations (tight
-flock, chaotic swarm, etc.)
+### 🌐 Cross-Platform
 
-Mouse interactions: - Add boids - Place obstacles - Add attractors
+- **Desktop** — Native LWJGL3/OpenGL build with uncapped FPS
+- **Browser** — Full GWT compilation to JavaScript; no plugins, no download required
 
-------------------------------------------------------------------------
+---
+
+## 🎛 Live Controls
+
+All parameters are adjustable in real-time via the collapsible right-side panel.
+
+<div align="center">
+  <img src="images/screenshot-full.png" alt="Boids Studio UI Panel" width="100%">
+  <sub>The control panel — collapsible, fully live</sub>
+</div>
+
+### 🛠 Placement Tools
+
+Select a tool from the toolbar, then **left-click or drag** anywhere on the simulation canvas:
+
+| Tool | Action |
+|---|---|
+| **Boids** | Spawn boids at the cursor position. Hold and drag to paint a stream of boids. |
+| **Obs** (Obstacles) | Place a solid circular obstacle (radius 30). Boids will actively steer around it. Right-click to remove. |
+| **Attr** (Attractors) | Place a food attractor. Nearby boids are drawn toward it, forming feeding clusters. |
+| **Pred** (Predators) | Place a predator that chases the nearest boid cluster at 1.5× boid speed. Boids within perception range will flee. |
+
+### ⚙️ Simulation Parameters
+
+| Slider | Range | Effect |
+|---|---|---|
+| **Max Speed** | 10 – 400 | Top velocity of every boid. Higher values produce more energetic, fast-moving swarms. |
+| **Perception** | 10 – 300 | Radius within which each boid perceives its neighbors. Larger values create broader, slower flocks. |
+| **Separation** | 0 – 50 | Repulsion strength between boids. High values prevent crowding and break up tight groups. |
+| **Alignment** | 0 – 50 | How strongly boids match the direction of their neighbors. High values produce coordinated streams. |
+| **Cohesion** | 0 – 50 | Attraction toward the local group center. High values pull boids into dense formations. |
+| **Avoid Obstacles** | 0 – 100 | Obstacle repulsion multiplier. Higher values widen the avoidance margin around obstacles. |
+
+### 🎬 Preset Configurations
+
+One-click presets that instantly reconfigure all parameters for a specific emergent behavior:
+
+| Preset | Behavior |
+|---|---|
+| **Classic Boids** | Balanced default parameters — natural, free-form flocking as described by Craig Reynolds |
+| **Tight Flock** | Elevated cohesion and alignment; boids snap into dense, fast-moving formations (180 px/s) |
+| **Chaotic Swarm** | High separation, minimal alignment, high speed; produces erratic, turbulent swarm motion (250 px/s) |
+| **School of Fish** | Strong alignment with a wide perception radius; smooth, coordinated stream behavior |
+| **Calm Birds** | Slow, loosely distributed movement with a large perception horizon — meditative and gentle (80 px/s) |
+
+### ▶ Simulation Controls
+
+| Button | Action |
+|---|---|
+| **Pause / Resume** | Freeze or resume the simulation at any time |
+| **Clear All** | Remove all boids, obstacles, attractors, and predators from the world |
+
+---
+
+## 🎮 Mouse & Keyboard Reference
+
+| Input | Action |
+|---|---|
+| Left Click / Drag | Use the currently selected placement tool |
+| Right Click | Remove the nearest obstacle |
+| Scroll Wheel | Zoom in / out (range: 0.1× – 5×) |
+| `<` button (panel edge) | Collapse the control panel |
+| `>` button (screen edge) | Expand the control panel |
+
+---
 
 ## 🧮 What Are Boids?
 
-Boids is an artificial life simulation originally created by Craig
-Reynolds (1986) to simulate flocking behavior.
+Boids is an artificial-life simulation model created by Craig Reynolds in 1986 to reproduce emergent flocking behavior. Each agent follows only three local rules — yet from these rules, complex coordinated swarm dynamics arise spontaneously.
 
-Each boid follows three simple rules:
+**The three rules:**
 
-1.  **Separation** -- Avoid crowding nearby boids\
-2.  **Alignment** -- Match velocity with neighbors\
-3.  **Cohesion** -- Move toward the center of nearby boids
+1. **Separation** — Steer away from boids that are too close, preventing collisions
+2. **Alignment** — Gradually match the heading and speed of nearby boids
+3. **Cohesion** — Steer toward the average position of the local neighborhood
 
-From these simple rules, complex emergent swarm behavior appears.
+**Boids Studio extends this foundation with:**
 
-Boids Studio extends this model with:
+- Obstacle repulsion fields
+- Predator pursuit and prey-fleeing instincts
+- Food attractor gravity
+- Fully tunable weight parameters — alter any rule weight at runtime to explore the phase space of emergent behavior
 
--   Environmental obstacles
--   Predator avoidance
--   Food attraction
--   Runtime parameter tuning
-
-------------------------------------------------------------------------
+---
 
 ## 🏗 Architecture
 
-    boids-core/
-      Pure Java simulation logic (no rendering dependencies)
-      Domain models
-      Simulation engine
-      Configuration
-      Integration tests
+The project is a multi-module Gradle build:
 
-    boids-desktop/
-      Desktop launcher
-      Rendering layer (LibGDX)
-      Input handling
-      UI & overlay
+```
+core/      Shared simulation + UI logic (platform-independent Java)
+           ├── model/    Vec2, Boid, Obstacle, Attractor, Predator
+           ├── sim/      World, BoidRules, SpatialGrid
+           ├── config/   SimulationConfig, Preset
+           ├── render/   WorldRenderer, BoidRenderer, TrailRenderer
+           ├── input/    InputHandler
+           └── ui/       ControlPanel, StatsOverlay, SkinFactory
 
-    boids-html/
-      Web launcher (GWT)
-      Browser-compatible rendering
+lwjgl3/    Desktop launcher — LWJGL3/OpenGL, native window
 
-Design principles: - Core simulation independent from rendering -
-Minimal external libraries - Modern Java 21 - Clean, readable,
-self-explanatory code - Configurable and extensible structure -
-Integration-focused testing
+html/      Web launcher — GWT compilation to JavaScript
+```
 
-------------------------------------------------------------------------
+**Design principles:**
+- Simulation logic is fully decoupled from rendering and platform code
+- Zero external dependencies beyond LibGDX itself
+- All hot paths are allocation-free — no per-frame heap objects on the critical loop
+- Configurable and extensible: all tunable constants live in `SimulationConfig`
+
+---
 
 ## 🚀 Running the Project
 
 ### Prerequisites
 
--   Java 21 (or latest LTS)
--   Gradle (or use wrapper)
+- Java 21 (or latest LTS)
+- Gradle (or use the included `./gradlew` wrapper — no installation needed)
 
-### ▶ Run Desktop Version
+### ▶ Run Desktop
 
-``` bash
-./gradlew run
+```bash
+./gradlew :lwjgl3:run
 ```
 
-### 🌐 Build Web Version
+### 🌐 Build & Serve Web
 
-``` bash
-./gradlew :boids-html:build
+```bash
+# Compile GWT and package the dist folder
+./gradlew :html:dist
+
+# Serve locally with any static server
+npx serve html/build/dist
 ```
 
-After build, serve the generated files via any static server.
+### 🔧 GWT Superdev (hot-reload web development)
 
-Example:
-
-``` bash
-npx serve build/dist
+```bash
+./gradlew :html:superDev
+# Then open http://localhost:8080 in your browser
 ```
 
-------------------------------------------------------------------------
-
-## 🎮 Controls
-
-  Action           Input
-  ---------------- ------------------
-  Add boids        Click / Drag
-  Place obstacle   Modifier + Click
-  Add attractor    Modifier + Click
-  Pause / Resume   UI Button
-  Reset            UI Button
-  Toggle stats     UI Toggle
-  Zoom             Mouse wheel
-
-------------------------------------------------------------------------
-
-## 📊 Live Metrics
-
-Toggleable overlay displaying: - FPS - Number of boids - Average speed -
-Average neighbor count
-
-------------------------------------------------------------------------
+---
 
 ## 🧪 Testing
 
-Core simulation logic includes: - Integration-style tests - Edge
-wrapping verification - Stability checks (no NaN / explosion) - Rule
-consistency validation
+Unit and integration tests cover the core simulation logic:
 
-Testing framework: **JUnit 5**
+- **Vec2** — arithmetic correctness, magnitude, normalization, edge cases
+- **World** — boid lifecycle, obstacle and predator interactions, edge wrapping stability, NaN/explosion guards
 
-Run tests:
+**Testing framework:** JUnit 5
 
-``` bash
+```bash
 ./gradlew test
 ```
 
-------------------------------------------------------------------------
-
-## 📚 Why This Project?
-
-Boids Studio was built as: - A deep dive into emergent behavior
-simulation - A clean architecture exercise - A Java game-dev
-exploration - A browser-deployable interactive experiment
-
-------------------------------------------------------------------------
+---
 
 ## ⚡ Performance Optimizations
 
-To break the ~1000 boid limit in the browser, three phases of optimization
-were applied:
+Three focused optimization passes were required to push beyond the ~600-boid browser ceiling and reach **2,800+ boids at 60 FPS**.
 
-### Phase 1 — Simulation lifecycle fixes
-- **Spatial grid reuse:** `SpatialGrid` is now cleared and reused each frame instead of being
-  re-instantiated, eliminating a full `HashMap` allocation per frame. The grid is only recreated
-  when the perception radius or world dimensions change.
-- **Perception radius caching:** `perceptionRadius` and `perceptionRadius²` are computed once
-  per `World.update` call and threaded through all rule calculations.
-- **UI update throttling:** `ControlPanel` and `StatsOverlay` label updates are throttled to
-  ~8 Hz instead of 60 Hz, eliminating ~52 string allocations per second per label.
+### Phase 1 — Simulation lifecycle
+
+| Optimization | Impact |
+|---|---|
+| **Spatial grid reuse** — `SpatialGrid` is cleared and reused each frame; recreated only when perception radius or world size changes | Eliminates full `HashMap` re-allocation every frame |
+| **Perception radius caching** — `perceptionRadius` and `perceptionRadius²` computed once per `World.update`, threaded through all rule calls | Removes redundant sqrt calls at the top of each rule |
+| **UI throttling** — `ControlPanel` and `StatsOverlay` label updates capped at ~8 Hz | Eliminates ~52 string allocations per second per label |
 
 ### Phase 2 — Hot-loop allocation elimination
-- **Single-pass flock rule:** `BoidRules.flock()` combines separation, alignment, and cohesion
-  in one neighbor iteration instead of three, cutting loop overhead by 3×.
-- **Raw float accumulation:** The inner loop uses `float` math throughout and creates exactly
-  one `Vec2` per boid per frame (the combined force), down from 4+ Vec2s per neighbor. With
-  1000 boids and ~20 neighbors each this eliminates ~80,000 short-lived allocations per frame.
-- **No-sqrt separation:** `diff.normalize().scale(500/d)` reduces to `diff * 500/d²`, removing
-  a `Math.sqrt` call per in-range neighbor.
-- **Neighbor buffer reuse:** A single `ArrayList<Boid>` is pre-allocated per `World` and cleared
-  before each boid's spatial query, eliminating 1000+ `ArrayList` allocations per frame.
-- **Pre-allocated predator proxy:** The temporary `Boid(-1, ...)` created per predator per frame
-  is replaced with a single pre-allocated proxy whose position is updated in-place.
-- **Index-based list iteration:** All hot-path list traversals use index loops to avoid
-  `Iterator` allocation overhead.
+
+| Optimization | Impact |
+|---|---|
+| **Single-pass flock rule** — `BoidRules.flock()` combines Separation, Alignment, and Cohesion in one neighbor loop | Cuts loop overhead by 3× |
+| **Raw float accumulation** — inner loop uses `float` math; produces exactly one `Vec2` per boid per frame | Eliminates ~80,000 short-lived allocations/frame at 1,000 boids × 20 neighbors |
+| **No-sqrt separation** — `diff * 500/d²` replaces `diff.normalize().scale(500/d)` | Removes one `Math.sqrt` call per in-range neighbor |
+| **Neighbor buffer reuse** — single pre-allocated `ArrayList<Boid>` cleared before each spatial query | Eliminates 1,000+ `ArrayList` allocations per frame |
+| **Predator proxy** — single pre-allocated proxy boid replaces per-predator-per-frame `new Boid(...)` | Eliminates predator-count object allocations per frame |
+| **Index-based iteration** — all hot-path list traversals use index loops | Avoids `Iterator` allocation on every traversal |
 
 ### Phase 3 — Adaptive rendering
-- **Trail adaptive quality:** Trails automatically reduce length at 600+ boids, shorten
-  further at 1000+, and disable entirely at 1500+ boids.
-- **Trail decimation:** At 1000+ boids, every second trail segment is skipped, halving
-  line draw calls.
-- **Trail ring buffer:** `LinkedList<Vec2>` replaced with `ArrayDeque<Vec2>` for better
-  cache locality and no per-node allocation.
-- **LOD boid rendering:** Boid triangle size scales down from 6px → 4px → 3px at 1000 and
-  1500 boid thresholds, slightly reducing fragment fill rate.
-- **Min-speed clamp removed:** The 20%-of-maxSpeed velocity floor was causing incorrect
-  edge-wrapping behavior and has been removed; boids now only enforce a maximum speed.
 
-### Expected results
-| Target | Boid count |
-|--------|-----------|
-| 60 FPS | 800–1200 (trails adaptive) |
-| 30+ FPS | 1500–2000+ (trails disabled) |
+| Optimization | Impact |
+|---|---|
+| **Adaptive trail quality** — trail length reduces at 600+ boids, shortens again at 1,000+, disables entirely at 1,500+ | Largest single rendering win at high counts |
+| **Trail decimation** — at 1,000+ boids, every other trail segment is skipped | Halves line draw calls at high density |
+| **Trail ring buffer** — `LinkedList<Vec2>` replaced with `ArrayDeque<Vec2>` | Better cache locality, zero per-node allocation |
+| **LOD boid rendering** — triangle size scales: 6px → 4px at 1,000 boids → 3px at 1,500 | Reduces fragment fill rate at high population |
 
-------------------------------------------------------------------------
+### Benchmark results
+
+| FPS Target | Boid Count |
+|---|---|
+| **60 FPS** (adaptive trails) | ~1,500 – 2,800 |
+| **60 FPS** (trails disabled) | 2,000 – 2,800+ |
+| **30+ FPS** | 2,800 – 4,000+ |
+
+> Verified: **2,894 boids at a sustained 60 FPS** in Chrome on standard consumer hardware.
+
+---
 
 ## 🤖 Built With AI
 
-This project was developed with the assistance of AI tools as a learning
-and exploration exercise.
+This project was developed with the assistance of AI tools (Cursor / Claude) as a learning and exploration exercise in emergent systems, game-dev architecture, and browser performance optimization.
 
-------------------------------------------------------------------------
+---
+
+## 📚 Why This Project?
+
+Boids Studio was built as:
+- A deep dive into emergent behavior simulation
+- A clean architecture exercise in Java game development
+- An exploration of browser performance limits with GWT/WebGL
+- A browser-deployable interactive experiment that anyone can run instantly
+
+---
 
 ## 📜 License
 
-MIT License
+MIT — see [LICENSE](LICENSE)
 
-------------------------------------------------------------------------
+---
 
 ## 👤 Author
 
-Eyal Shahaf
+**Eyal Shahaf** — [GitHub](https://github.com/EyalShahaf/boids-studio)
