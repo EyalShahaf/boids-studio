@@ -129,8 +129,6 @@ public class ControlPanel {
                     preset.apply(cfg);
                     for (Runnable syncer : uiSyncers)
                         syncer.run();
-                    updateToolSelection(); // Ensure tools state is reflected if preset changes something (though it
-                                           // doesn't currently)
                 }
             });
             presetTable.add(presetBtn).fillX().padBottom(2).row();
