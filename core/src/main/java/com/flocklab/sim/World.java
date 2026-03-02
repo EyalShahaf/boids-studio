@@ -73,7 +73,8 @@ public class World {
             boid.applyForce(flockForce);
             boid.applyForce(BoidRules.avoidObstacles(boid, obstacles, perceptionRadius)
                     .scale(config.obstacleAvoidanceWeight));
-            boid.applyForce(BoidRules.fleePredators(boid, predators, perceptionRadius)
+            boid.applyForce(BoidRules.fleePredators(boid, predators,
+                    config.fleeDetectionRadius, config.fleeForceScale)
                     .scale(config.predatorFleeWeight));
             boid.applyForce(BoidRules.seekAttractors(boid, attractors, perceptionRadius)
                     .scale(config.foodAttractionWeight));

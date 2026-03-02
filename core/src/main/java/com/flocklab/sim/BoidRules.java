@@ -116,18 +116,25 @@ public class BoidRules {
         return new Vec2(totalX, totalY);
     }
 
-    public static Vec2 fleePredators(Boid boid, List<Predator> predators, float perceptionRadius) {
-        float perceptionRadiusSq = perceptionRadius * perceptionRadius;
+    /**
+     * Flee force using inverse-distance-squared weighting so boids panic hard
+     * when a predator is very close and gently veer away at distance.
+     * Uses a dedicated fleeDetectionRadius (larger than perceptionRadius) so
+     * boids notice predators from further away than the flocking radius.
+     */
+    public static Vec2 fleePredators(Boid boid, List<Predator> predators,
+            float fleeDetectionRadius, float fleeForceScale) {
+        float radiusSq = fleeDetectionRadius * fleeDetectionRadius;
         float totalX = 0, totalY = 0;
         for (int i = 0; i < predators.size(); i++) {
             Predator p = predators.get(i);
             float dx = boid.getPosition().x() - p.getPosition().x();
             float dy = boid.getPosition().y() - p.getPosition().y();
             float d2 = dx * dx + dy * dy;
-            if (d2 > 0 && d2 < perceptionRadiusSq) {
-                float d = (float) Math.sqrt(d2);
-                totalX += dx / d;
-                totalY += dy / d;
+            if (d2 > 0 && d2 < radiusSq) {
+                float scale = fleeForceScale / d2;
+                totalX += dx * scale;
+                totalY += dy * scale;
             }
         }
         return new Vec2(totalX, totalY);

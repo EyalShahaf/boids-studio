@@ -16,6 +16,9 @@ public class SimulationConfig {
     public float predatorFleeWeight = 2.5f;
     public float foodAttractionWeight = 1.2f;
 
+    public float fleeDetectionRadius = 150f;
+    public float fleeForceScale = 3000f;
+
     public int initialBoidCount = 500;
     public float worldWidth = 1280f;
     public float worldHeight = 720f;
@@ -32,6 +35,8 @@ public class SimulationConfig {
         this.obstacleAvoidanceWeight = other.obstacleAvoidanceWeight;
         this.predatorFleeWeight = other.predatorFleeWeight;
         this.foodAttractionWeight = other.foodAttractionWeight;
+        this.fleeDetectionRadius = other.fleeDetectionRadius;
+        this.fleeForceScale = other.fleeForceScale;
         this.initialBoidCount = other.initialBoidCount;
         this.worldWidth = other.worldWidth;
         this.worldHeight = other.worldHeight;
