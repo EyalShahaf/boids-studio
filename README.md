@@ -13,7 +13,7 @@
 
 </div>
 
-An interactive, real-time **flocking simulation** built with **Java 21** and **LibGDX** — running both natively on desktop and directly in the browser via GWT. Boids Studio goes beyond the classic three-rule algorithm with predator-prey dynamics, obstacle avoidance, food attractors, and a fully live-editable parameter set, all while sustaining **2,800+ boids at a steady 60 FPS in-browser**.
+An interactive, real-time **flocking simulation** built with **Java 21** and **LibGDX** — running both natively on desktop and directly in the browser via GWT. Boids Studio goes beyond the classic three-rule algorithm with a full **Game Of Life** ecosystem: predators that hunt, starve, and die; boids that sprint, exhaust, feed, and go hungry; emergent population dynamics; and a fully live-editable parameter set, all while sustaining **2,800+ boids at a steady 60 FPS in-browser**.
 
 ---
 
@@ -37,6 +37,7 @@ An interactive, real-time **flocking simulation** built with **Java 21** and **L
 | CI/CD pipeline — GitHub Actions → GitHub Pages auto-deploy | ✅ Complete |
 | Automated versioning — build-timestamped releases | ✅ Complete |
 | Three-phase performance overhaul | ✅ Complete |
+| **Game Of Life Addition** — stamina, hunger, eating, starvation, statistics | ✅ Complete |
 
 ---
 
@@ -46,17 +47,38 @@ An interactive, real-time **flocking simulation** built with **Java 21** and **L
 
 - **Classic Boids** — Separation, Alignment, and Cohesion implemented as a single-pass, allocation-free hot loop
 - **Obstacle Avoidance** — Boids actively steer away from placed circular obstacles
-- **Predator–Prey Dynamics** — Predators actively chase the nearest boid cluster; boids flee when a predator enters their perception radius
-- **Food Attractors** — Place attractor points that boids are drawn toward, creating emergent feeding behavior
+- **Predator–Prey Dynamics** — Predators actively chase the nearest boid cluster; boids flee when a predator enters their perception radius using inverse-distance-squared panic forces
+- **Food Attractors** — Place attractor points that boids are drawn toward; hungry boids seek food up to 2.5× more urgently
 - **Edge Wrapping** — The world is toroidal; boids seamlessly cross any edge and reappear on the opposite side
 - **Spatial Grid Acceleration** — An adaptive spatial hash grid ensures near-O(1) neighbor lookup, making large swarms feasible in real-time
+
+### 🦁 Game Of Life Addition
+
+A full ecological lifecycle layer sits on top of the classic flocking rules:
+
+**Boids**
+- **Stamina** — Sprinting away from a nearby predator drains stamina. Exhausted boids can no longer sprint, making them vulnerable.
+- **Hunger** — Hunger drains slowly over time. Hungry boids seek food attractors with greater urgency. Eating near an attractor replenishes both hunger and stamina.
+- **Life bars** — A tiny stamina bar (cyan → red) appears above a sprinting boid; a hunger bar (orange → dark-red) appears when hunger drops below 75%.
+
+**Predators**
+- **Hunger & starvation** — Predator hunger drains at 4/s. When hunger reaches zero the predator dies and disappears.
+- **Eating** — A predator within eat range has a ~70% per-second chance of consuming a boid, replenishing its hunger. Starving predators eat up to 2× more frantically.
+- **Sprint** — Predators sprint toward nearby boids, consuming stamina. Chase force scales up to 3× as a predator starves.
+- **Life bars** — Hunger (green → red) and stamina (white → dark) bars are always visible above each predator.
+
+**Statistics overlay** (top-left HUD)
+- Boids Created / Eaten
+- Predators Created / Starved
+
+**Life bars toggle** — A "Life Bars: ON/OFF" button in the control panel instantly hides all life bars for a cleaner view.
 
 ### 🎨 Visual Rendering
 
 - **Dynamic HSL coloring** — Each boid's hue is derived from its heading angle, producing naturally shifting color gradients across the flock
 - **Additive blending** — Overlapping boids brighten rather than occlude, giving dense clusters a vibrant glow effect
 - **Motion trails** — A fading trail follows each boid, reinforcing the sense of speed and fluid motion
-- **Adaptive LOD** — Trail length, trail density, and boid triangle size all scale down automatically as the population grows to maintain framerate
+- **Adaptive LOD** — Trail length, trail density, boid triangle size, and predator triangle size all scale down proportionally as the population grows to maintain framerate
 
 ### 🌐 Cross-Platform
 
@@ -83,7 +105,7 @@ Select a tool from the toolbar, then **left-click or drag** anywhere on the simu
 | **Boids** | Spawn boids at the cursor position. Hold and drag to paint a stream of boids. |
 | **Obs** (Obstacles) | Place a solid circular obstacle (radius 30). Boids will actively steer around it. Right-click to remove. |
 | **Attr** (Attractors) | Place a food attractor. Nearby boids are drawn toward it, forming feeding clusters. |
-| **Pred** (Predators) | Place a predator that chases the nearest boid cluster at 1.5× boid speed. Boids within perception range will flee. |
+| **Pred** (Predators) | Place a predator that chases the nearest boid cluster at 1.5× boid speed. Starts with full hunger and stamina; starves to death if it doesn't eat. Boids within perception range will flee in panic. |
 
 ### ⚙️ Simulation Parameters
 
@@ -114,6 +136,7 @@ One-click presets that instantly reconfigure all parameters for a specific emerg
 |---|---|
 | **Pause / Resume** | Freeze or resume the simulation at any time |
 | **Clear All** | Remove all boids, obstacles, attractors, and predators from the world |
+| **Life Bars: ON/OFF** | Toggle the stamina and hunger bars above boids and predators |
 
 ---
 
@@ -142,8 +165,9 @@ Boids is an artificial-life simulation model created by Craig Reynolds in 1986 t
 **Boids Studio extends this foundation with:**
 
 - Obstacle repulsion fields
-- Predator pursuit and prey-fleeing instincts
-- Food attractor gravity
+- Predator pursuit and inverse-distance-squared prey-fleeing instincts
+- Food attractor gravity scaled by boid hunger
+- Stamina, hunger, eating, and starvation — a full ecological lifecycle
 - Fully tunable weight parameters — alter any rule weight at runtime to explore the phase space of emergent behavior
 
 ---
@@ -212,6 +236,7 @@ Unit and integration tests cover the core simulation logic:
 
 - **Vec2** — arithmetic correctness, magnitude, normalization, edge cases
 - **World** — boid lifecycle, obstacle and predator interactions, edge wrapping stability, NaN/explosion guards
+- **Game Of Life mechanics** — predator eating & counter increment, predator starvation death, boid stamina drain & sprint cutoff, flee force inverse-distance weighting, boid hunger drain & food regen, hunger-scaled food attraction force
 
 **Testing framework:** JUnit 5
 
@@ -251,7 +276,7 @@ Three focused optimization passes were required to push beyond the ~600-boid bro
 | **Adaptive trail quality** — trail length reduces at 600+ boids, shortens again at 1,000+, disables entirely at 1,500+ | Largest single rendering win at high counts |
 | **Trail decimation** — at 1,000+ boids, every other trail segment is skipped | Halves line draw calls at high density |
 | **Trail ring buffer** — `LinkedList<Vec2>` replaced with `ArrayDeque<Vec2>` | Better cache locality, zero per-node allocation |
-| **LOD boid rendering** — triangle size scales: 6px → 4px at 1,000 boids → 3px at 1,500 | Reduces fragment fill rate at high population |
+| **Shared LOD scale** — a single `computeLodScale()` factor drives both boid (6px→4px→3px) and predator (12px→8px→6px) triangle sizes at the same thresholds | Predators always stay exactly 2× boid size; no drift at any population level |
 
 ### Benchmark results
 
