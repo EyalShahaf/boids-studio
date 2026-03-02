@@ -19,6 +19,13 @@ public class SimulationConfig {
     public float fleeDetectionRadius = 150f;
     public float fleeForceScale = 3000f;
 
+    public float boidStaminaMax = 100f;
+    public float boidSprintTriggerRadius = 80f;
+    public float boidSprintSpeedMultiplier = 1.6f;
+    public float boidStaminaDrainRate = 35f;
+    public float boidStaminaRegenBaseRate = 10f;
+    public float boidStaminaRegenNearFoodBonus = 15f;
+
     public int initialBoidCount = 500;
     public float worldWidth = 1280f;
     public float worldHeight = 720f;
@@ -37,6 +44,12 @@ public class SimulationConfig {
         this.foodAttractionWeight = other.foodAttractionWeight;
         this.fleeDetectionRadius = other.fleeDetectionRadius;
         this.fleeForceScale = other.fleeForceScale;
+        this.boidStaminaMax = other.boidStaminaMax;
+        this.boidSprintTriggerRadius = other.boidSprintTriggerRadius;
+        this.boidSprintSpeedMultiplier = other.boidSprintSpeedMultiplier;
+        this.boidStaminaDrainRate = other.boidStaminaDrainRate;
+        this.boidStaminaRegenBaseRate = other.boidStaminaRegenBaseRate;
+        this.boidStaminaRegenNearFoodBonus = other.boidStaminaRegenNearFoodBonus;
         this.initialBoidCount = other.initialBoidCount;
         this.worldWidth = other.worldWidth;
         this.worldHeight = other.worldHeight;

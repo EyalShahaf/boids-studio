@@ -9,11 +9,16 @@ public class Boid {
     private Vec2 velocity;
     private Vec2 acceleration;
 
-    public Boid(int id, Vec2 position, Vec2 velocity) {
+    private float stamina;
+    private boolean isSprinting;
+
+    public Boid(int id, Vec2 position, Vec2 velocity, float initialStamina) {
         this.id = id;
         this.position = position;
         this.velocity = velocity;
         this.acceleration = Vec2.ZERO;
+        this.stamina = initialStamina;
+        this.isSprinting = false;
     }
 
     public int getId() {
@@ -36,6 +41,22 @@ public class Boid {
         this.velocity = velocity;
     }
 
+    public float getStamina() {
+        return stamina;
+    }
+
+    public void setStamina(float stamina) {
+        this.stamina = stamina;
+    }
+
+    public boolean isSprinting() {
+        return isSprinting;
+    }
+
+    public void setSprinting(boolean sprinting) {
+        this.isSprinting = sprinting;
+    }
+
     /**
      * Adds a steering force to the current acceleration.
      */
@@ -44,26 +65,38 @@ public class Boid {
     }
 
     /**
-     * Updates physics, limits speed, resets acceleration, and wraps around world
-     * edges.
+     * Updates physics, limits speed (with optional sprint multiplier), resets
+     * acceleration, and wraps around world edges.
      */
     public void update(float deltaTime, float maxSpeed, float worldWidth, float worldHeight) {
-        // Apply acceleration to velocity
         velocity = velocity.add(acceleration.scale(deltaTime));
 
-        // Enforce maximum speed
+        float effectiveMax = isSprinting ? maxSpeed : maxSpeed;
         float speed = velocity.magnitude();
-        if (speed > maxSpeed) {
-            velocity = velocity.setMagnitude(maxSpeed);
+        if (speed > effectiveMax) {
+            velocity = velocity.setMagnitude(effectiveMax);
         }
 
-        // Apply velocity to position
         position = position.add(velocity.scale(deltaTime));
-
-        // Reset acceleration for next frame
         acceleration = Vec2.ZERO;
+        wrapEdges(worldWidth, worldHeight);
+    }
 
-        // Wrap edges
+    /**
+     * Sprint-aware update that applies a speed boost when sprinting.
+     */
+    public void update(float deltaTime, float maxSpeed, float sprintMultiplier,
+            float worldWidth, float worldHeight) {
+        velocity = velocity.add(acceleration.scale(deltaTime));
+
+        float effectiveMax = isSprinting ? maxSpeed * sprintMultiplier : maxSpeed;
+        float speed = velocity.magnitude();
+        if (speed > effectiveMax) {
+            velocity = velocity.setMagnitude(effectiveMax);
+        }
+
+        position = position.add(velocity.scale(deltaTime));
+        acceleration = Vec2.ZERO;
         wrapEdges(worldWidth, worldHeight);
     }
 

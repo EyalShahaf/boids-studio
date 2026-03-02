@@ -51,7 +51,7 @@ public class WorldRenderer implements Disposable {
         trailRenderer.updateAndRender(shapeRenderer, world.getBoids());
 
         // 4. Render Boids & Predators
-        boidRenderer.render(shapeRenderer, world.getBoids(), world.getPredators());
+        boidRenderer.render(shapeRenderer, world.getBoids(), world.getPredators(), world.getConfig());
 
         // Cleanup GL state
         Gdx.gl.glDisable(GL20.GL_BLEND);

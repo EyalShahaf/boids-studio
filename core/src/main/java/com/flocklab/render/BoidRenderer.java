@@ -2,6 +2,7 @@ package com.flocklab.render;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.flocklab.config.SimulationConfig;
 import com.flocklab.model.Boid;
 import com.flocklab.model.Predator;
 
@@ -26,7 +27,8 @@ public class BoidRenderer {
 
     private boolean showLifeBars = true;
 
-    public void render(ShapeRenderer shapeRenderer, List<Boid> boids, List<Predator> predators) {
+    public void render(ShapeRenderer shapeRenderer, List<Boid> boids, List<Predator> predators,
+            SimulationConfig config) {
         int boidCount = boids.size();
         float lodScale = computeLodScale(boidCount);
         float boidSize = BOID_BASE_SIZE * lodScale;
@@ -51,7 +53,37 @@ public class BoidRenderer {
                     predator.getVelocity().angle(), predatorSize);
         }
 
+        // Life bars drawn after triangles so they render on top
+        if (showLifeBars) {
+            drawBoidLifeBars(shapeRenderer, boids, config, boidSize);
+        }
+
         shapeRenderer.end();
+    }
+
+    /** Draws a small stamina bar above each boid that is currently sprinting. */
+    private void drawBoidLifeBars(ShapeRenderer sr, List<Boid> boids,
+            SimulationConfig config, float boidSize) {
+        float barWidth = 10f;
+        float barHeight = 2f;
+        float barOffsetY = boidSize * 1.5f + 3f;
+
+        for (int i = 0; i < boids.size(); i++) {
+            Boid boid = boids.get(i);
+            if (!boid.isSprinting()) continue;
+
+            float fraction = boid.getStamina() / config.boidStaminaMax;
+            float bx = boid.getPosition().x() - barWidth / 2f;
+            float by = boid.getPosition().y() + barOffsetY;
+
+            // Background (dark)
+            sr.setColor(0.2f, 0.2f, 0.2f, 0.8f);
+            sr.rect(bx, by, barWidth, barHeight);
+
+            // Filled portion: cyan (full) → red (empty)
+            sr.setColor(1f - fraction, fraction, fraction * 0.8f, 1f);
+            sr.rect(bx, by, barWidth * fraction, barHeight);
+        }
     }
 
     /**

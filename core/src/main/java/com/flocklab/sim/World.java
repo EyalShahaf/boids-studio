@@ -1,5 +1,6 @@
 package com.flocklab.sim;
 
+import com.badlogic.gdx.math.MathUtils;
 import com.flocklab.config.SimulationConfig;
 import com.flocklab.model.Attractor;
 import com.flocklab.model.Boid;
@@ -35,7 +36,7 @@ public class World {
     private final List<Boid> neighborBuffer = new ArrayList<>();
 
     /** Pre-allocated proxy boid used for predator spatial queries. */
-    private final Boid predatorProxy = new Boid(-1, Vec2.ZERO, Vec2.ZERO);
+    private final Boid predatorProxy = new Boid(-1, Vec2.ZERO, Vec2.ZERO, 0f);
 
     public World(SimulationConfig config) {
         this.config = config;
@@ -46,7 +47,8 @@ public class World {
             float y = (float) (Math.random() * config.worldHeight);
             float vx = (float) (Math.random() * 2 - 1);
             float vy = (float) (Math.random() * 2 - 1);
-            boids.add(new Boid(nextBoidId++, new Vec2(x, y), new Vec2(vx, vy).setMagnitude(config.maxSpeed)));
+            boids.add(new Boid(nextBoidId++, new Vec2(x, y),
+                    new Vec2(vx, vy).setMagnitude(config.maxSpeed), config.boidStaminaMax));
         }
     }
 
@@ -81,7 +83,10 @@ public class World {
         }
 
         for (int i = 0; i < boids.size(); i++) {
-            boids.get(i).update(deltaTime, config.maxSpeed, worldWidth, worldHeight);
+            Boid boid = boids.get(i);
+            updateBoidStaminaAndSprint(boid, deltaTime);
+            boid.update(deltaTime, config.maxSpeed, config.boidSprintSpeedMultiplier,
+                    worldWidth, worldHeight);
         }
 
         if (!predators.isEmpty()) {
@@ -95,6 +100,51 @@ public class World {
                 predator.update(chase, deltaTime, worldWidth, worldHeight);
             }
         }
+    }
+
+    /**
+     * Updates stamina and sprint state for a single boid.
+     * Sprint triggers when any predator is within boidSprintTriggerRadius and stamina > 0.
+     * Stamina always regenerates at the base rate; near attractors an additional bonus applies.
+     */
+    private void updateBoidStaminaAndSprint(Boid boid, float deltaTime) {
+        float sprintRadiusSq = config.boidSprintTriggerRadius * config.boidSprintTriggerRadius;
+        boolean predatorNear = false;
+        for (int p = 0; p < predators.size(); p++) {
+            float dx = boid.getPosition().x() - predators.get(p).getPosition().x();
+            float dy = boid.getPosition().y() - predators.get(p).getPosition().y();
+            if (dx * dx + dy * dy < sprintRadiusSq) {
+                predatorNear = true;
+                break;
+            }
+        }
+
+        float stamina = boid.getStamina();
+
+        if (predatorNear && stamina > 0f) {
+            boid.setSprinting(true);
+            stamina -= config.boidStaminaDrainRate * deltaTime;
+        } else {
+            boid.setSprinting(false);
+        }
+
+        // Always regenerate at base rate
+        stamina += config.boidStaminaRegenBaseRate * deltaTime;
+
+        // Extra bonus near a food attractor
+        if (!attractors.isEmpty()) {
+            float perceptionSq = config.perceptionRadius * config.perceptionRadius;
+            for (int a = 0; a < attractors.size(); a++) {
+                float dx = boid.getPosition().x() - attractors.get(a).position().x();
+                float dy = boid.getPosition().y() - attractors.get(a).position().y();
+                if (dx * dx + dy * dy < perceptionSq) {
+                    stamina += config.boidStaminaRegenNearFoodBonus * deltaTime;
+                    break;
+                }
+            }
+        }
+
+        boid.setStamina(MathUtils.clamp(stamina, 0f, config.boidStaminaMax));
     }
 
     private SpatialGrid createGrid() {
@@ -131,7 +181,7 @@ public class World {
     }
 
     public void addBoid(Vec2 pos, Vec2 vel) {
-        boids.add(new Boid(nextBoidId++, pos, vel));
+        boids.add(new Boid(nextBoidId++, pos, vel, config.boidStaminaMax));
     }
 
     public void addObstacle(Obstacle obs) {
