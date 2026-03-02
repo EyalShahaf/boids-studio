@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label.LabelStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider.SliderStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
+import com.badlogic.gdx.scenes.scene2d.ui.Window.WindowStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
 /**
@@ -59,6 +60,11 @@ public class SkinFactory {
         sliderStyle.background = skin.getDrawable("slider_bg");
         sliderStyle.knob = skin.getDrawable("slider_knob");
         skin.add("default-horizontal", sliderStyle);
+
+        WindowStyle windowStyle = new WindowStyle();
+        windowStyle.titleFont = font;
+        windowStyle.background = skin.getDrawable("panel_bg");
+        skin.add("default", windowStyle);
 
         return skin;
     }

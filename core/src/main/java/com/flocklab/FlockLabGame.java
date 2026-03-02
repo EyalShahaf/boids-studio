@@ -62,6 +62,9 @@ public class FlockLabGame extends ApplicationAdapter {
         Table mainArea = new Table();
         root.add(mainArea).expand().fill();
 
+        // Spacer to push footer down
+        mainArea.add().expand().fill().row();
+
         // Footer in mainArea
         Table footer = new Table();
         footer.bottom();
@@ -73,7 +76,7 @@ public class FlockLabGame extends ApplicationAdapter {
             }
         });
         footer.add(creditBtn).padBottom(10);
-        mainArea.add(footer).expand().bottom().center();
+        mainArea.add(footer).bottom().center();
 
         // Control Panel (right)
         controlPanel = new ControlPanel(root, stage, skin, world, this);
