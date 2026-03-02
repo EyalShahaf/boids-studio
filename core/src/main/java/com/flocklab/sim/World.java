@@ -42,7 +42,7 @@ public class World {
     private final List<Boid> neighborBuffer = new ArrayList<>();
 
     /** Pre-allocated proxy boid used for predator spatial queries. */
-    private final Boid predatorProxy = new Boid(-1, Vec2.ZERO, Vec2.ZERO, 0f);
+    private final Boid predatorProxy = new Boid(-1, Vec2.ZERO, Vec2.ZERO, 0f, 0f);
 
     // ---- Game Of Life statistics ----
     private int totalBoidsCreated = 0;
@@ -60,7 +60,8 @@ public class World {
             float vx = (float) (Math.random() * 2 - 1);
             float vy = (float) (Math.random() * 2 - 1);
             boids.add(new Boid(nextBoidId++, new Vec2(x, y),
-                    new Vec2(vx, vy).setMagnitude(config.maxSpeed), config.boidStaminaMax));
+                    new Vec2(vx, vy).setMagnitude(config.maxSpeed),
+                    config.boidStaminaMax, config.boidHungerMax));
             totalBoidsCreated++;
         }
     }
@@ -92,8 +93,11 @@ public class World {
             boid.applyForce(BoidRules.fleePredators(boid, predators,
                     config.fleeDetectionRadius, config.fleeForceScale)
                     .scale(config.predatorFleeWeight));
+            // Hungry boids seek food more urgently; pull scales up as hunger depletes
+            float boidHungerFraction = boid.getHunger() / config.boidHungerMax;
+            float foodFactor = 1f + (1f - boidHungerFraction) * config.boidHungerFoodAttractionMultiplier;
             boid.applyForce(BoidRules.seekAttractors(boid, attractors, perceptionRadius)
-                    .scale(config.foodAttractionWeight));
+                    .scale(config.foodAttractionWeight * foodFactor));
         }
 
         // --- Boid physics + stamina ---
@@ -129,9 +133,12 @@ public class World {
     }
 
     /**
-     * Updates stamina and sprint state for a single boid.
-     * Sprint triggers when any predator is within boidSprintTriggerRadius and stamina > 0.
-     * Stamina always regenerates at the base rate; near attractors an extra bonus applies.
+     * Updates stamina, hunger, and sprint state for a single boid.
+     *
+     * Sprint: triggers when any predator is within boidSprintTriggerRadius and stamina > 0.
+     * Stamina: always regenerates at base rate; eating near an attractor gives a bonus.
+     * Hunger: always drains slowly; eating near an attractor replenishes it.
+     * Eating near food also replenishes stamina via the existing near-food bonus.
      */
     private void updateBoidStaminaAndSprint(Boid boid, float deltaTime) {
         float sprintRadiusSq = config.boidSprintTriggerRadius * config.boidSprintTriggerRadius;
@@ -146,7 +153,9 @@ public class World {
         }
 
         float stamina = boid.getStamina();
+        float hunger = boid.getHunger();
 
+        // Sprint drains stamina; no predator nearby resets sprint
         if (predatorNear && stamina > 0f) {
             boid.setSprinting(true);
             stamina -= config.boidStaminaDrainRate * deltaTime;
@@ -154,16 +163,20 @@ public class World {
             boid.setSprinting(false);
         }
 
-        // Always regenerate at base rate
+        // Hunger drains continuously (slower than predators)
+        hunger -= config.boidHungerDrainRate * deltaTime;
+
+        // Always regenerate stamina at base rate
         stamina += config.boidStaminaRegenBaseRate * deltaTime;
 
-        // Extra bonus near a food attractor
+        // Near a food attractor: eat — replenish both hunger and stamina
         if (!attractors.isEmpty()) {
             float perceptionSq = config.perceptionRadius * config.perceptionRadius;
             for (int a = 0; a < attractors.size(); a++) {
                 float dx = boid.getPosition().x() - attractors.get(a).position().x();
                 float dy = boid.getPosition().y() - attractors.get(a).position().y();
                 if (dx * dx + dy * dy < perceptionSq) {
+                    hunger += config.boidHungerRegenNearFoodRate * deltaTime;
                     stamina += config.boidStaminaRegenNearFoodBonus * deltaTime;
                     break;
                 }
@@ -171,6 +184,7 @@ public class World {
         }
 
         boid.setStamina(MathUtils.clamp(stamina, 0f, config.boidStaminaMax));
+        boid.setHunger(MathUtils.clamp(hunger, 0f, config.boidHungerMax));
     }
 
     /**
@@ -296,7 +310,7 @@ public class World {
     }
 
     public void addBoid(Vec2 pos, Vec2 vel) {
-        boids.add(new Boid(nextBoidId++, pos, vel, config.boidStaminaMax));
+        boids.add(new Boid(nextBoidId++, pos, vel, config.boidStaminaMax, config.boidHungerMax));
         totalBoidsCreated++;
     }
 

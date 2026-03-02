@@ -62,28 +62,50 @@ public class BoidRenderer {
         shapeRenderer.end();
     }
 
-    /** Draws a small stamina bar above each boid that is currently sprinting. */
+    /** Fraction below which a boid's hunger bar becomes visible. */
+    private static final float BOID_HUNGER_WARN_THRESHOLD = 0.75f;
+
+    /**
+     * Draws tiny life bars above boids when relevant:
+     *  - Stamina bar: only when the boid is sprinting (predator nearby).
+     *  - Hunger bar: when hunger drops below BOID_HUNGER_WARN_THRESHOLD.
+     * Stacking both bars keeps the display compact while showing meaningful state.
+     */
     private void drawBoidLifeBars(ShapeRenderer sr, List<Boid> boids,
             SimulationConfig config, float boidSize) {
         float barWidth = 10f;
         float barHeight = 2f;
-        float barOffsetY = boidSize * 1.5f + 3f;
+        float gap = 1f;
+        float baseOffsetY = boidSize * 1.5f + 3f;
 
         for (int i = 0; i < boids.size(); i++) {
             Boid boid = boids.get(i);
-            if (!boid.isSprinting()) continue;
+            boolean showStamina = boid.isSprinting();
+            boolean showHunger = boid.getHunger() / config.boidHungerMax < BOID_HUNGER_WARN_THRESHOLD;
 
-            float fraction = boid.getStamina() / config.boidStaminaMax;
+            if (!showStamina && !showHunger) continue;
+
             float bx = boid.getPosition().x() - barWidth / 2f;
-            float by = boid.getPosition().y() + barOffsetY;
+            float by = boid.getPosition().y() + baseOffsetY;
 
-            // Background (dark)
-            sr.setColor(0.2f, 0.2f, 0.2f, 0.8f);
-            sr.rect(bx, by, barWidth, barHeight);
+            if (showStamina) {
+                float fraction = boid.getStamina() / config.boidStaminaMax;
+                sr.setColor(0.2f, 0.2f, 0.2f, 0.8f);
+                sr.rect(bx, by, barWidth, barHeight);
+                // Cyan (full) → red (empty)
+                sr.setColor(1f - fraction, fraction, fraction * 0.8f, 1f);
+                sr.rect(bx, by, barWidth * fraction, barHeight);
+                by += barHeight + gap;
+            }
 
-            // Filled portion: cyan (full) → red (empty)
-            sr.setColor(1f - fraction, fraction, fraction * 0.8f, 1f);
-            sr.rect(bx, by, barWidth * fraction, barHeight);
+            if (showHunger) {
+                float fraction = boid.getHunger() / config.boidHungerMax;
+                sr.setColor(0.2f, 0.2f, 0.2f, 0.8f);
+                sr.rect(bx, by, barWidth, barHeight);
+                // Orange (full) → dark red (empty)
+                sr.setColor(0.9f, fraction * 0.6f, 0f, 1f);
+                sr.rect(bx, by, barWidth * fraction, barHeight);
+            }
         }
     }
 

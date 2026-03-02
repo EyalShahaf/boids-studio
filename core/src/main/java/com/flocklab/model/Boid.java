@@ -10,14 +10,16 @@ public class Boid {
     private Vec2 acceleration;
 
     private float stamina;
+    private float hunger;
     private boolean isSprinting;
 
-    public Boid(int id, Vec2 position, Vec2 velocity, float initialStamina) {
+    public Boid(int id, Vec2 position, Vec2 velocity, float initialStamina, float initialHunger) {
         this.id = id;
         this.position = position;
         this.velocity = velocity;
         this.acceleration = Vec2.ZERO;
         this.stamina = initialStamina;
+        this.hunger = initialHunger;
         this.isSprinting = false;
     }
 
@@ -49,6 +51,14 @@ public class Boid {
         this.stamina = stamina;
     }
 
+    public float getHunger() {
+        return hunger;
+    }
+
+    public void setHunger(float hunger) {
+        this.hunger = hunger;
+    }
+
     public boolean isSprinting() {
         return isSprinting;
     }
@@ -65,16 +75,14 @@ public class Boid {
     }
 
     /**
-     * Updates physics, limits speed (with optional sprint multiplier), resets
-     * acceleration, and wraps around world edges.
+     * Updates physics, limits speed, resets acceleration, and wraps around world edges.
      */
     public void update(float deltaTime, float maxSpeed, float worldWidth, float worldHeight) {
         velocity = velocity.add(acceleration.scale(deltaTime));
 
-        float effectiveMax = isSprinting ? maxSpeed : maxSpeed;
         float speed = velocity.magnitude();
-        if (speed > effectiveMax) {
-            velocity = velocity.setMagnitude(effectiveMax);
+        if (speed > maxSpeed) {
+            velocity = velocity.setMagnitude(maxSpeed);
         }
 
         position = position.add(velocity.scale(deltaTime));

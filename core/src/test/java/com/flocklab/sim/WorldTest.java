@@ -178,6 +178,7 @@ class WorldTest {
         config.boidStaminaRegenBaseRate = 0f;  // No regen to isolate drain
         config.boidStaminaRegenNearFoodBonus = 0f;
         config.predatorHungerDrainRate = 0f;   // Predator won't die during test
+        config.predatorEatRadius = 0f;         // Prevent predator from eating the test boid
         World world = new World(config);
 
         world.addBoid(new Vec2(100f, 100f), new Vec2(0f, 0f));
@@ -206,6 +207,7 @@ class WorldTest {
         config.boidStaminaRegenBaseRate = 0f;
         config.boidStaminaRegenNearFoodBonus = 0f;
         config.predatorHungerDrainRate = 0f;
+        config.predatorEatRadius = 0f;        // Prevent predator from eating the test boid
         World world = new World(config);
 
         world.addBoid(new Vec2(100f, 100f), new Vec2(0f, 0f));
@@ -222,9 +224,94 @@ class WorldTest {
     }
 
     @Test
+    void testBoidHungerDrains() {
+        SimulationConfig config = new SimulationConfig();
+        config.initialBoidCount = 0;
+        config.boidHungerDrainRate = 50f; // Drain fast for visible effect in few frames
+        config.boidHungerRegenNearFoodRate = 0f; // No regen (no attractors anyway)
+        World world = new World(config);
+
+        world.addBoid(new Vec2(100f, 100f), new Vec2(0f, 0f));
+        float initialHunger = world.getBoids().get(0).getHunger();
+        assertEquals(config.boidHungerMax, initialHunger, 0.001f);
+
+        for (int i = 0; i < 10; i++) {
+            world.update(0.016f);
+        }
+
+        assertTrue(world.getBoids().get(0).getHunger() < initialHunger,
+                "Boid hunger should decrease over time");
+    }
+
+    @Test
+    void testBoidHungerReplenishedNearFood() {
+        SimulationConfig config = new SimulationConfig();
+        config.initialBoidCount = 0;
+        config.boidHungerDrainRate = 0f;             // Disable drain so regen is isolated
+        config.boidHungerRegenNearFoodRate = 200f;   // Fast regen to see effect quickly
+        config.perceptionRadius = 200f;              // Large so attractor is within range
+        World world = new World(config);
+
+        world.addBoid(new Vec2(100f, 100f), new Vec2(0f, 0f));
+        // Manually set boid hunger low to verify regen
+        // Access via mutable boid reference — set hunger low before update
+        world.update(0.001f); // tiny warm-up step so hunger is at max
+        // Place attractor right next to boid
+        world.addAttractor(new com.flocklab.model.Attractor(new Vec2(105f, 100f), 100f));
+
+        // Force hunger down by adjusting config drain temporarily
+        config.boidHungerDrainRate = 1000f;
+        world.update(0.05f); // drain hunger significantly
+        config.boidHungerDrainRate = 0f;
+
+        float hungryLevel = world.getBoids().get(0).getHunger();
+        assertTrue(hungryLevel < config.boidHungerMax, "Setup: boid should be hungry");
+
+        // Now regen with attractor nearby
+        for (int i = 0; i < 10; i++) {
+            world.update(0.016f);
+        }
+
+        assertTrue(world.getBoids().get(0).getHunger() > hungryLevel,
+                "Boid hunger should increase when near an attractor");
+    }
+
+    @Test
+    void testHungryBoidSeeksFoodMoreAggressively() {
+        // A very hungry boid should have a larger food attraction force than a full boid
+        SimulationConfig config = new SimulationConfig();
+        config.initialBoidCount = 0;
+        config.boidHungerFoodAttractionMultiplier = 2.0f;
+        config.foodAttractionWeight = 1.0f;
+        config.perceptionRadius = 500f; // Wide so attractor is always in range
+
+        com.flocklab.model.Attractor food = new com.flocklab.model.Attractor(new Vec2(200f, 200f), 100f);
+        java.util.List<com.flocklab.model.Attractor> attractors = new java.util.ArrayList<>();
+        attractors.add(food);
+
+        // Full boid
+        Boid fullBoid = new Boid(0, new Vec2(100f, 100f), new Vec2(0f, 0f), 100f, 100f);
+        // Starving boid
+        Boid hungryBoid = new Boid(1, new Vec2(100f, 100f), new Vec2(0f, 0f), 100f, 0f);
+
+        float fullHungerFraction = fullBoid.getHunger() / config.boidHungerMax;
+        float fullFoodFactor = 1f + (1f - fullHungerFraction) * config.boidHungerFoodAttractionMultiplier;
+        Vec2 fullForce = BoidRules.seekAttractors(fullBoid, attractors, config.perceptionRadius)
+                .scale(config.foodAttractionWeight * fullFoodFactor);
+
+        float hungryHungerFraction = hungryBoid.getHunger() / config.boidHungerMax;
+        float hungryFoodFactor = 1f + (1f - hungryHungerFraction) * config.boidHungerFoodAttractionMultiplier;
+        Vec2 hungryForce = BoidRules.seekAttractors(hungryBoid, attractors, config.perceptionRadius)
+                .scale(config.foodAttractionWeight * hungryFoodFactor);
+
+        assertTrue(hungryForce.magnitude() > fullForce.magnitude(),
+                "A starving boid should seek food with greater force than a full boid");
+    }
+
+    @Test
     void testFleeForceStrongerWhenCloser() {
         // Verify inverse-distance-squared weighting: closer predator → larger flee force
-        Boid boid = new Boid(0, new Vec2(100f, 100f), new Vec2(0f, 0f), 100f);
+        Boid boid = new Boid(0, new Vec2(100f, 100f), new Vec2(0f, 0f), 100f, 100f);
 
         Predator closePredator = new Predator(0, new Vec2(110f, 100f), Vec2.ZERO, 100f, 100f, 100f);
         Predator farPredator = new Predator(1, new Vec2(180f, 100f), Vec2.ZERO, 100f, 100f, 100f);

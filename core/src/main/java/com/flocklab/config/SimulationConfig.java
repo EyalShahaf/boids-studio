@@ -26,6 +26,11 @@ public class SimulationConfig {
     public float boidStaminaRegenBaseRate = 10f;
     public float boidStaminaRegenNearFoodBonus = 15f;
 
+    public float boidHungerMax = 100f;
+    public float boidHungerDrainRate = 1.5f;
+    public float boidHungerRegenNearFoodRate = 30f;
+    public float boidHungerFoodAttractionMultiplier = 1.5f;
+
     public float predatorHungerMax = 100f;
     public float predatorHungerDrainRate = 4f;
     public float predatorHungerOnEat = 40f;
@@ -60,6 +65,10 @@ public class SimulationConfig {
         this.boidStaminaDrainRate = other.boidStaminaDrainRate;
         this.boidStaminaRegenBaseRate = other.boidStaminaRegenBaseRate;
         this.boidStaminaRegenNearFoodBonus = other.boidStaminaRegenNearFoodBonus;
+        this.boidHungerMax = other.boidHungerMax;
+        this.boidHungerDrainRate = other.boidHungerDrainRate;
+        this.boidHungerRegenNearFoodRate = other.boidHungerRegenNearFoodRate;
+        this.boidHungerFoodAttractionMultiplier = other.boidHungerFoodAttractionMultiplier;
         this.predatorHungerMax = other.predatorHungerMax;
         this.predatorHungerDrainRate = other.predatorHungerDrainRate;
         this.predatorHungerOnEat = other.predatorHungerOnEat;
