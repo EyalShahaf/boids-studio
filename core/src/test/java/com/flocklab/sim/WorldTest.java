@@ -3,8 +3,11 @@ package com.flocklab.sim;
 import com.flocklab.config.SimulationConfig;
 import com.flocklab.model.Boid;
 import com.flocklab.model.Obstacle;
+import com.flocklab.model.Predator;
 import com.flocklab.model.Vec2;
 import org.junit.jupiter.api.Test;
+
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -120,5 +123,127 @@ class WorldTest {
 
         assertTrue(Math.abs(world.getBoids().get(0).getVelocity().y()) > 0.01f,
                 "Boid should have deflected to avoid the obstacle");
+    }
+
+    // ---- Game Of Life tests ----
+
+    @Test
+    void testPredatorEatsBoid() {
+        SimulationConfig config = new SimulationConfig();
+        config.initialBoidCount = 0;
+        config.predatorEatRadius = 20f;
+        // Set chance to 1.0 so eating is guaranteed each frame when in range
+        config.predatorEatChancePerSecond = 1000f;
+        config.predatorHungerDrainRate = 0f; // Prevent hunger death during test
+        World world = new World(config);
+
+        world.addBoid(new Vec2(100f, 100f), new Vec2(0f, 0f));
+        // Spawn predator directly on top of boid
+        world.spawnPredator(new Vec2(100f, 100f));
+
+        int boidsBefore = world.getBoids().size();
+        assertEquals(1, boidsBefore);
+
+        world.update(0.016f);
+
+        assertEquals(0, world.getBoids().size(), "Boid within eat radius should have been eaten");
+        assertEquals(1, world.getTotalBoidsEaten(), "Eaten counter should be 1");
+    }
+
+    @Test
+    void testPredatorDiesOfHunger() {
+        SimulationConfig config = new SimulationConfig();
+        config.initialBoidCount = 0;
+        config.predatorHungerMax = 10f;
+        config.predatorHungerDrainRate = 10f; // Drain 10/s — dead in 1 second
+        World world = new World(config);
+
+        world.spawnPredator(new Vec2(640f, 360f));
+        assertEquals(1, world.getPredators().size());
+        assertEquals(1, world.getTotalPredatorsCreated());
+
+        // Simulate 2 seconds — more than enough for hunger to reach 0
+        for (int i = 0; i < 120; i++) {
+            world.update(0.016f);
+        }
+
+        assertEquals(0, world.getPredators().size(), "Predator should have starved to death");
+        assertEquals(1, world.getTotalPredatorsDiedOfHunger(), "Starvation death counter should be 1");
+    }
+
+    @Test
+    void testBoidStaminaDrains() {
+        SimulationConfig config = new SimulationConfig();
+        config.initialBoidCount = 0;
+        config.boidSprintTriggerRadius = 200f; // Large so boid definitely sprints
+        config.boidStaminaDrainRate = 100f;    // Drain fast for visible effect in few frames
+        config.boidStaminaRegenBaseRate = 0f;  // No regen to isolate drain
+        config.boidStaminaRegenNearFoodBonus = 0f;
+        config.predatorHungerDrainRate = 0f;   // Predator won't die during test
+        World world = new World(config);
+
+        world.addBoid(new Vec2(100f, 100f), new Vec2(0f, 0f));
+        world.spawnPredator(new Vec2(110f, 100f)); // Within sprint trigger radius
+
+        float initialStamina = world.getBoids().get(0).getStamina();
+        assertEquals(config.boidStaminaMax, initialStamina, 0.001f);
+
+        for (int i = 0; i < 10; i++) {
+            world.update(0.016f);
+        }
+
+        float updatedStamina = world.getBoids().get(0).getStamina();
+        assertTrue(updatedStamina < initialStamina,
+                "Boid stamina should decrease while sprinting near a predator");
+        assertTrue(world.getBoids().get(0).isSprinting(),
+                "Boid should be sprinting when predator is within trigger radius");
+    }
+
+    @Test
+    void testBoidStaminaStopsSprintingWhenExhausted() {
+        SimulationConfig config = new SimulationConfig();
+        config.initialBoidCount = 0;
+        config.boidSprintTriggerRadius = 200f;
+        config.boidStaminaDrainRate = 10000f; // Drain instantly
+        config.boidStaminaRegenBaseRate = 0f;
+        config.boidStaminaRegenNearFoodBonus = 0f;
+        config.predatorHungerDrainRate = 0f;
+        World world = new World(config);
+
+        world.addBoid(new Vec2(100f, 100f), new Vec2(0f, 0f));
+        world.spawnPredator(new Vec2(110f, 100f));
+
+        // Run enough frames to exhaust stamina
+        for (int i = 0; i < 20; i++) {
+            world.update(0.016f);
+        }
+
+        Boid boid = world.getBoids().get(0);
+        assertEquals(0f, boid.getStamina(), 0.001f, "Stamina should be clamped at 0");
+        assertFalse(boid.isSprinting(), "Boid should stop sprinting when stamina is exhausted");
+    }
+
+    @Test
+    void testFleeForceStrongerWhenCloser() {
+        // Verify inverse-distance-squared weighting: closer predator → larger flee force
+        Boid boid = new Boid(0, new Vec2(100f, 100f), new Vec2(0f, 0f), 100f);
+
+        Predator closePredator = new Predator(0, new Vec2(110f, 100f), Vec2.ZERO, 100f, 100f, 100f);
+        Predator farPredator = new Predator(1, new Vec2(180f, 100f), Vec2.ZERO, 100f, 100f, 100f);
+
+        java.util.List<Predator> closeList = new java.util.ArrayList<>();
+        closeList.add(closePredator);
+
+        java.util.List<Predator> farList = new java.util.ArrayList<>();
+        farList.add(farPredator);
+
+        float fleeRadius = 200f;
+        float fleeScale = 3000f;
+
+        Vec2 closeForce = BoidRules.fleePredators(boid, closeList, fleeRadius, fleeScale);
+        Vec2 farForce = BoidRules.fleePredators(boid, farList, fleeRadius, fleeScale);
+
+        assertTrue(closeForce.magnitude() > farForce.magnitude(),
+                "Flee force should be stronger when the predator is closer (inverse-distance-squared)");
     }
 }
