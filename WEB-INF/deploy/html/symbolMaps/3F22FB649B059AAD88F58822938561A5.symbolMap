@@ -17777,18 +17777,18 @@ SpatialGrid$lambda$0$Type,,com.flocklab.sim.SpatialGrid$lambda$0$Type,,com/flock
 ase,com.flocklab.sim.SpatialGrid$lambda$0$Type::SpatialGrid$lambda$0$Type() <init>,com.flocklab.sim.SpatialGrid$lambda$0$Type,SpatialGrid$lambda$0$Type,com/flocklab/sim/SpatialGrid.java,44,0
 bse,com.flocklab.sim.SpatialGrid$lambda$0$Type::apply(Ljava/lang/Object;)Ljava/lang/Object;,com.flocklab.sim.SpatialGrid$lambda$0$Type,apply,com/flocklab/sim/SpatialGrid.java,44,0
 World,,com.flocklab.sim.World,,com/flocklab/sim/World.java,22,-1
-cse,com.flocklab.sim.World::$addAttractor(Lcom/flocklab/sim/World;Lcom/flocklab/model/Attractor;)V,com.flocklab.sim.World,$addAttractor,com/flocklab/sim/World.java,331,0
-dse,com.flocklab.sim.World::$addBoid(Lcom/flocklab/sim/World;Lcom/flocklab/model/Vec2;Lcom/flocklab/model/Vec2;)V,com.flocklab.sim.World,$addBoid,com/flocklab/sim/World.java,312,0
-ese,com.flocklab.sim.World::$addObstacle(Lcom/flocklab/sim/World;Lcom/flocklab/model/Obstacle;)V,com.flocklab.sim.World,$addObstacle,com/flocklab/sim/World.java,317,0
-fse,com.flocklab.sim.World::$clearAll(Lcom/flocklab/sim/World;)V,com.flocklab.sim.World,$clearAll,com/flocklab/sim/World.java,349,0
-gse,com.flocklab.sim.World::$handlePredatorEating(Lcom/flocklab/sim/World;Lcom/flocklab/model/Predator;Ljava/util/List;Ljava/util/Set;F)V,com.flocklab.sim.World,$handlePredatorEating,com/flocklab/sim/World.java,240,0
-hse,com.flocklab.sim.World::$removeDeadEntities(Lcom/flocklab/sim/World;Ljava/util/Set;Ljava/util/List;)V,com.flocklab.sim.World,$removeDeadEntities,com/flocklab/sim/World.java,269,0
-ise,com.flocklab.sim.World::$removeObstacleNear(Lcom/flocklab/sim/World;Lcom/flocklab/model/Vec2;F)Z,com.flocklab.sim.World,$removeObstacleNear,com/flocklab/sim/World.java,321,0
-jse,com.flocklab.sim.World::$setCursorMode(Lcom/flocklab/sim/World;Lcom/flocklab/sim/World$CursorMode;)V,com.flocklab.sim.World,$setCursorMode,com/flocklab/sim/World.java,360,0
-kse,com.flocklab.sim.World::$spawnPredator(Lcom/flocklab/sim/World;Lcom/flocklab/model/Vec2;)V,com.flocklab.sim.World,$spawnPredator,com/flocklab/sim/World.java,336,0
+cse,com.flocklab.sim.World::$addAttractor(Lcom/flocklab/sim/World;Lcom/flocklab/model/Attractor;)V,com.flocklab.sim.World,$addAttractor,com/flocklab/sim/World.java,355,0
+dse,com.flocklab.sim.World::$addBoid(Lcom/flocklab/sim/World;Lcom/flocklab/model/Vec2;Lcom/flocklab/model/Vec2;)V,com.flocklab.sim.World,$addBoid,com/flocklab/sim/World.java,336,0
+ese,com.flocklab.sim.World::$addObstacle(Lcom/flocklab/sim/World;Lcom/flocklab/model/Obstacle;)V,com.flocklab.sim.World,$addObstacle,com/flocklab/sim/World.java,341,0
+fse,com.flocklab.sim.World::$clearAll(Lcom/flocklab/sim/World;)V,com.flocklab.sim.World,$clearAll,com/flocklab/sim/World.java,373,0
+gse,com.flocklab.sim.World::$handlePredatorEating(Lcom/flocklab/sim/World;Lcom/flocklab/model/Predator;Ljava/util/List;Ljava/util/Set;F)V,com.flocklab.sim.World,$handlePredatorEating,com/flocklab/sim/World.java,264,0
+hse,com.flocklab.sim.World::$removeDeadEntities(Lcom/flocklab/sim/World;Ljava/util/Set;Ljava/util/List;)V,com.flocklab.sim.World,$removeDeadEntities,com/flocklab/sim/World.java,293,0
+ise,com.flocklab.sim.World::$removeObstacleNear(Lcom/flocklab/sim/World;Lcom/flocklab/model/Vec2;F)Z,com.flocklab.sim.World,$removeObstacleNear,com/flocklab/sim/World.java,345,0
+jse,com.flocklab.sim.World::$setCursorMode(Lcom/flocklab/sim/World;Lcom/flocklab/sim/World$CursorMode;)V,com.flocklab.sim.World,$setCursorMode,com/flocklab/sim/World.java,384,0
+kse,com.flocklab.sim.World::$spawnPredator(Lcom/flocklab/sim/World;Lcom/flocklab/model/Vec2;)V,com.flocklab.sim.World,$spawnPredator,com/flocklab/sim/World.java,360,0
 lse,com.flocklab.sim.World::$update(Lcom/flocklab/sim/World;F)V,com.flocklab.sim.World,$update,com/flocklab/sim/World.java,69,0
-mse,com.flocklab.sim.World::$updateBoidStaminaAndSprint(Lcom/flocklab/sim/World;Lcom/flocklab/model/Boid;F)V,com.flocklab.sim.World,$updateBoidStaminaAndSprint,com/flocklab/sim/World.java,143,0
-nse,com.flocklab.sim.World::$updatePredatorHungerAndSprint(Lcom/flocklab/sim/World;Lcom/flocklab/model/Predator;Ljava/util/List;Lcom/flocklab/model/Vec2;FLjava/util/List;)Lcom/flocklab/model/Vec2;,com.flocklab.sim.World,$updatePredatorHungerAndSprint,com/flocklab/sim/World.java,195,0
+mse,com.flocklab.sim.World::$updateBoidStaminaAndSprint(Lcom/flocklab/sim/World;Lcom/flocklab/model/Boid;F)V,com.flocklab.sim.World,$updateBoidStaminaAndSprint,com/flocklab/sim/World.java,167,0
+nse,com.flocklab.sim.World::$updatePredatorHungerAndSprint(Lcom/flocklab/sim/World;Lcom/flocklab/model/Predator;Ljava/util/List;Lcom/flocklab/model/Vec2;FLjava/util/List;)Lcom/flocklab/model/Vec2;,com.flocklab.sim.World,$updatePredatorHungerAndSprint,com/flocklab/sim/World.java,219,0
 ose,com.flocklab.sim.World::World(Lcom/flocklab/config/SimulationConfig;) <init>,com.flocklab.sim.World,World,com/flocklab/sim/World.java,53,0
 a,com.flocklab.sim.World::attractors,com.flocklab.sim.World,attractors,com/flocklab/sim/World.java,26,-1
 b,com.flocklab.sim.World::boids,com.flocklab.sim.World,boids,com/flocklab/sim/World.java,24,-1
@@ -17806,9 +17806,9 @@ p,com.flocklab.sim.World::totalBoidsCreated,com.flocklab.sim.World,totalBoidsCre
 q,com.flocklab.sim.World::totalBoidsEaten,com.flocklab.sim.World,totalBoidsEaten,com/flocklab/sim/World.java,49,-1
 r,com.flocklab.sim.World::totalPredatorsCreated,com.flocklab.sim.World,totalPredatorsCreated,com/flocklab/sim/World.java,50,-1
 s,com.flocklab.sim.World::totalPredatorsDiedOfHunger,com.flocklab.sim.World,totalPredatorsDiedOfHunger,com/flocklab/sim/World.java,51,-1
-World$lambda$0$Type,,com.flocklab.sim.World$lambda$0$Type,,com/flocklab/sim/World.java,271,-1
-pse,com.flocklab.sim.World$lambda$0$Type::World$lambda$0$Type(Ljava/util/Set;) <init>,com.flocklab.sim.World$lambda$0$Type,World$lambda$0$Type,com/flocklab/sim/World.java,271,0
-a,com.flocklab.sim.World$lambda$0$Type::eatenBoidIds_0,com.flocklab.sim.World$lambda$0$Type,eatenBoidIds_0,com/flocklab/sim/World.java,271,-1
+World$lambda$0$Type,,com.flocklab.sim.World$lambda$0$Type,,com/flocklab/sim/World.java,295,-1
+pse,com.flocklab.sim.World$lambda$0$Type::World$lambda$0$Type(Ljava/util/Set;) <init>,com.flocklab.sim.World$lambda$0$Type,World$lambda$0$Type,com/flocklab/sim/World.java,295,0
+a,com.flocklab.sim.World$lambda$0$Type::eatenBoidIds_0,com.flocklab.sim.World$lambda$0$Type,eatenBoidIds_0,com/flocklab/sim/World.java,295,-1
 ControlPanel,,com.flocklab.ui.ControlPanel,,com/flocklab/ui/ControlPanel.java,29,-1
 qse,com.flocklab.ui.ControlPanel::$addSliderRow(Lcom/flocklab/ui/ControlPanel;Lcom/badlogic/gdx/scenes/scene2d/ui/Table;Ljava/lang/String;FFFLcom/flocklab/ui/ControlPanel$ValueProvider;Lcom/flocklab/ui/ControlPanel$ValueUpdater;)V,com.flocklab.ui.ControlPanel,$addSliderRow,com/flocklab/ui/ControlPanel.java,245,0
 rse,com.flocklab.ui.ControlPanel::$addToolButton(Lcom/flocklab/ui/ControlPanel;Lcom/badlogic/gdx/scenes/scene2d/ui/Table;Ljava/lang/String;Lcom/flocklab/sim/World$CursorMode;)V,com.flocklab.ui.ControlPanel,$addToolButton,com/flocklab/ui/ControlPanel.java,198,0
@@ -19060,7 +19060,7 @@ kMe,com.google.gwt.lang.ClassLiteralHolder::Lcom_flocklab_render_TrailRenderer_2
 lMe,com.google.gwt.lang.ClassLiteralHolder::Lcom_flocklab_render_WorldRenderer_2_classLit,com.google.gwt.lang.ClassLiteralHolder,Lcom_flocklab_render_WorldRenderer_2_classLit,com/flocklab/render/WorldRenderer.java,16,-1
 mMe,com.google.gwt.lang.ClassLiteralHolder::Lcom_flocklab_sim_SpatialGrid$lambda$0$Type_2_classLit,com.google.gwt.lang.ClassLiteralHolder,Lcom_flocklab_sim_SpatialGrid$lambda$0$Type_2_classLit,com/flocklab/sim/SpatialGrid.java,44,-1
 nMe,com.google.gwt.lang.ClassLiteralHolder::Lcom_flocklab_sim_SpatialGrid_2_classLit,com.google.gwt.lang.ClassLiteralHolder,Lcom_flocklab_sim_SpatialGrid_2_classLit,com/flocklab/sim/SpatialGrid.java,14,-1
-oMe,com.google.gwt.lang.ClassLiteralHolder::Lcom_flocklab_sim_World$lambda$0$Type_2_classLit,com.google.gwt.lang.ClassLiteralHolder,Lcom_flocklab_sim_World$lambda$0$Type_2_classLit,com/flocklab/sim/World.java,271,-1
+oMe,com.google.gwt.lang.ClassLiteralHolder::Lcom_flocklab_sim_World$lambda$0$Type_2_classLit,com.google.gwt.lang.ClassLiteralHolder,Lcom_flocklab_sim_World$lambda$0$Type_2_classLit,com/flocklab/sim/World.java,295,-1
 pMe,com.google.gwt.lang.ClassLiteralHolder::Lcom_flocklab_sim_World_2_classLit,com.google.gwt.lang.ClassLiteralHolder,Lcom_flocklab_sim_World_2_classLit,com/flocklab/sim/World.java,22,-1
 qMe,com.google.gwt.lang.ClassLiteralHolder::Lcom_flocklab_ui_ControlPanel$1_2_classLit,com.google.gwt.lang.ClassLiteralHolder,Lcom_flocklab_ui_ControlPanel$1_2_classLit,com/flocklab/ui/ControlPanel.java,72,-1
 rMe,com.google.gwt.lang.ClassLiteralHolder::Lcom_flocklab_ui_ControlPanel$2_2_classLit,com.google.gwt.lang.ClassLiteralHolder,Lcom_flocklab_ui_ControlPanel$2_2_classLit,com/flocklab/ui/ControlPanel.java,117,-1
