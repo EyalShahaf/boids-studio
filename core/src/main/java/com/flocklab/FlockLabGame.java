@@ -84,16 +84,18 @@ public class FlockLabGame extends ApplicationAdapter {
         // Footer in mainArea - use a spacer to push it to the bottom
         mainArea.add().expand().fill().row();
 
-        Table footer = new Table();
-        TextButton creditBtn = new TextButton("Developed by Eyal Shahaf  |  Version " + AppVersion.VERSION, skin);
-        creditBtn.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                Gdx.net.openURI("https://github.com/EyalShahaf/boids-studio");
-            }
-        });
-        footer.add(creditBtn).padBottom(10);
-        mainArea.add(footer).bottom().center();
+        if (profile == DeviceProfile.DESKTOP) {
+            Table footer = new Table();
+            TextButton creditBtn = new TextButton("Developed by Eyal Shahaf  |  Version " + AppVersion.VERSION, skin);
+            creditBtn.addListener(new ChangeListener() {
+                @Override
+                public void changed(ChangeEvent event, Actor actor) {
+                    Gdx.net.openURI("https://github.com/EyalShahaf/boids-studio");
+                }
+            });
+            footer.add(creditBtn).padBottom(10);
+            mainArea.add(footer).bottom().center();
+        }
 
         // Control Panel (right)
         controlPanel = new ControlPanel(root, stage, skin, world, this);

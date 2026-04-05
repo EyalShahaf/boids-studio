@@ -9,6 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
+import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
@@ -34,7 +35,7 @@ public class ControlPanel {
 
     private final Table panel;
     private final Cell<Table> panelCell;
-    private Cell<Table> innerPanelCell;
+    private Cell<?> innerPanelCell;
     private boolean isRetracted = false;
 
     private Label boidCountLabel;
@@ -67,6 +68,10 @@ public class ControlPanel {
         panel.pad(isMobile ? 5 : 15);
         buildPanel(panel, isMobile);
 
+        final ScrollPane scrollPane = new ScrollPane(panel, skin);
+        scrollPane.setOverscroll(false, false);
+        scrollPane.setFadeScrollBars(false);
+
         // Toggle button
         final TextButton toggleBtn = new TextButton(isMobile ? "v" : "<", skin);
         toggleBtn.addListener(new ChangeListener() {
@@ -90,10 +95,10 @@ public class ControlPanel {
         if (isMobile) {
             // toggle first (top), panel next (bottom)
             container.add(toggleBtn).height(40).expandX().fillX().row();
-            innerPanelCell = container.add(panel).height(230).expandX().fillX();
+            innerPanelCell = container.add(scrollPane).height(230).expandX().fillX();
         } else {
             // Panel first (left), toggle last (right / screen edge)
-            innerPanelCell = container.add(panel).width(210).expandY().fillY();
+            innerPanelCell = container.add(scrollPane).width(230).expandY().fillY();
             container.add(toggleBtn).width(40).expandY().fillY();
         }
     }

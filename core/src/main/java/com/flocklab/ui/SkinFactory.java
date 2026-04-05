@@ -24,7 +24,9 @@ public class SkinFactory {
 
         // Basic font
         BitmapFont font = new BitmapFont();
-        if (profile != DeviceProfile.DESKTOP) {
+        if (profile == DeviceProfile.MOBILE_SMALL) {
+            font.getData().setScale(2.2f);
+        } else if (profile == DeviceProfile.TABLET) {
             font.getData().setScale(1.5f);
         }
         skin.add("default", font);
@@ -42,8 +44,8 @@ public class SkinFactory {
         skin.add("button_up", createColorDrawable(buttonColor), com.badlogic.gdx.scenes.scene2d.utils.Drawable.class);
         skin.add("button_down", createColorDrawable(buttonDownColor),
                 com.badlogic.gdx.scenes.scene2d.utils.Drawable.class);
-        int sliderThickness = profile == DeviceProfile.DESKTOP ? 4 : 8;
-        int knobSize = profile == DeviceProfile.DESKTOP ? 12 : 24;
+        int sliderThickness = profile == DeviceProfile.MOBILE_SMALL ? 12 : (profile == DeviceProfile.TABLET ? 8 : 4);
+        int knobSize = profile == DeviceProfile.MOBILE_SMALL ? 36 : (profile == DeviceProfile.TABLET ? 24 : 12);
 
         skin.add("slider_bg", createColorDrawable(sliderBgColor, 100, sliderThickness),
                 com.badlogic.gdx.scenes.scene2d.utils.Drawable.class);
