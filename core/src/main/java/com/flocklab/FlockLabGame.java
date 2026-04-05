@@ -37,10 +37,19 @@ public class FlockLabGame extends ApplicationAdapter {
     private StatsOverlay statsOverlay;
 
     private boolean isPaused = false;
+    private final com.flocklab.config.PlatformHints platformHints;
+
+    public FlockLabGame() {
+        this(null);
+    }
+
+    public FlockLabGame(com.flocklab.config.PlatformHints hints) {
+        this.platformHints = hints;
+    }
 
     @Override
     public void create() {
-        DeviceProfile profile = DeviceProfile.detect();
+        DeviceProfile profile = DeviceProfile.detect(platformHints);
         SimulationConfig config = new SimulationConfig(profile);
 
         // Initialise world dimensions to exact screen size (avoid default stretching)

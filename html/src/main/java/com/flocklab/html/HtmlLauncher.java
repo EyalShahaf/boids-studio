@@ -20,6 +20,6 @@ public class HtmlLauncher extends GwtApplication {
 
     @Override
     public ApplicationListener createApplicationListener() {
-        return new FlockLabGame();
+        return new FlockLabGame(new HtmlPlatformHints());
     }
 }
