@@ -27,7 +27,7 @@ public class World {
     private final List<Predator> predators = new ArrayList<>();
 
     public enum CursorMode {
-        BOID, OBSTACLE, ATTRACTOR, PREDATOR
+        BOID, OBSTACLE, ATTRACTOR, PREDATOR, ERASER
     }
 
     private CursorMode currentMode = CursorMode.BOID;
@@ -346,6 +346,27 @@ public class World {
         for (int i = 0; i < obstacles.size(); i++) {
             if (obstacles.get(i).center().distanceTo(pos) <= radius) {
                 obstacles.remove(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean removeAttractorNear(Vec2 pos, float radius) {
+        for (int i = 0; i < attractors.size(); i++) {
+            if (attractors.get(i).position().distanceTo(pos) <= radius) {
+                attractors.remove(i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean removePredatorNear(Vec2 pos, float radius) {
+        for (int i = 0; i < predators.size(); i++) {
+            if (predators.get(i).getPosition().distanceTo(pos) <= radius) {
+                predators.remove(i);
+                totalPredatorsDiedOfHunger++; // Using it to track removal stats
                 return true;
             }
         }

@@ -114,8 +114,12 @@ public class InputHandler extends InputAdapter {
                 spawnBoid(screenX, screenY);
                 break;
             case OBSTACLE:
-                if (!Gdx.input.isButtonPressed(Input.Buttons.LEFT))
-                    return false; // Only once per click
+                if (!world.getObstacles().isEmpty()) {
+                    Obstacle last = world.getObstacles().get(world.getObstacles().size() - 1);
+                    if (last.center().distanceTo(worldPos) < 15f) {
+                        return false; // Throttle dense obstacle stacking on drag
+                    }
+                }
                 world.addObstacle(new Obstacle(worldPos, 30f));
                 break;
             case ATTRACTOR:
@@ -123,6 +127,9 @@ public class InputHandler extends InputAdapter {
                 break;
             case PREDATOR:
                 world.spawnPredator(worldPos);
+                break;
+            case ERASER:
+                handleRemoval(screenX, screenY);
                 break;
         }
         return true;
@@ -133,10 +140,10 @@ public class InputHandler extends InputAdapter {
         camera.unproject(tempVec);
         Vec2 worldPos = new Vec2(tempVec.x, tempVec.y);
 
-        // Remove obstacle/attractor/predator near if clicked
-        if (!world.removeObstacleNear(worldPos, 30f)) {
-            // Future: could also remove attractors/predators
-        }
+        float radius = 40f;
+        if (world.removeObstacleNear(worldPos, radius)) return;
+        if (world.removeAttractorNear(worldPos, radius)) return;
+        if (world.removePredatorNear(worldPos, radius)) return;
     }
 
     private void spawnBoid(int screenX, int screenY) {

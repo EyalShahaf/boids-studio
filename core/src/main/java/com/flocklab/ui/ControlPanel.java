@@ -110,6 +110,7 @@ public class ControlPanel {
         addToolButton(tools, "Obs", World.CursorMode.OBSTACLE);
         addToolButton(tools, "Attr", World.CursorMode.ATTRACTOR);
         addToolButton(tools, "Pred", World.CursorMode.PREDATOR);
+        addToolButton(tools, "Eraser", World.CursorMode.ERASER);
         panel.add(tools).padBottom(15).row();
 
         // --- Controls ---
