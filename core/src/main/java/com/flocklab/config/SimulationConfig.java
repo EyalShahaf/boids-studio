@@ -96,8 +96,14 @@ public class SimulationConfig {
     }
 
     public void resetToDefaults() {
-        // Keep the current profile
+        // Preserve runtime state that should NOT be reset
         DeviceProfile currentProfile = this.deviceProfile;
+        float currentWidth = this.worldWidth;
+        float currentHeight = this.worldHeight;
+
         this.copyFrom(new SimulationConfig(currentProfile));
+
+        this.worldWidth = currentWidth;
+        this.worldHeight = currentHeight;
     }
 }
