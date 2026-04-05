@@ -90,11 +90,10 @@ public class FlockLabGame extends ApplicationAdapter {
         controlPanel = new ControlPanel(root, stage, skin, world, this);
         statsOverlay = new StatsOverlay(stage, skin, world);
 
-        // Input distribution: UI first, then gestures, then world interactions
+        // Input distribution: UI first, then world/touch interactions
         InputMultiplexer multiplexer = new InputMultiplexer();
         InputHandler inputHandler = new InputHandler(world, camera, stage);
         multiplexer.addProcessor(stage);
-        multiplexer.addProcessor(new com.badlogic.gdx.input.GestureDetector(inputHandler));
         multiplexer.addProcessor(inputHandler);
         Gdx.input.setInputProcessor(multiplexer);
 

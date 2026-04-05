@@ -72,8 +72,6 @@ public class ControlPanel {
         toggleBtn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                if (event.getTarget() != toggleBtn) return;
-
                 isRetracted = !isRetracted;
                 panel.setVisible(!isRetracted);
                 if (isMobile) {

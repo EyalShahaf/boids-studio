@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -14,16 +13,24 @@ import com.flocklab.model.Vec2;
 import com.flocklab.sim.World;
 
 /**
- * Handles mouse and keyboard input for interacting with the simulation.
+ * Handles mouse/touch and keyboard input for the simulation.
+ * Supports single-touch interactions and two-finger pinch-to-zoom.
  */
-public class InputHandler extends InputAdapter implements GestureDetector.GestureListener {
+public class InputHandler extends InputAdapter {
     private final World world;
     private final OrthographicCamera camera;
     private final Stage stage;
 
-    // Temporary vectors for unprojecting coordinates
-    private final Vector3 tempVec = new Vector3();
+    // Temporary vectors
+    private final Vector3 tempVec  = new Vector3();
     private final Vector2 tempVec2 = new Vector2();
+
+    // Two-finger pinch-to-zoom state
+    private final Vector2 pointer0 = new Vector2();
+    private final Vector2 pointer1 = new Vector2();
+    private boolean pinching = false;
+    private float   pinchStartDist = 0f;
+    private float   pinchStartZoom = 1f;
 
     public InputHandler(World world, OrthographicCamera camera, Stage stage) {
         this.world = world;
@@ -39,25 +46,48 @@ public class InputHandler extends InputAdapter implements GestureDetector.Gestur
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        if (isOverUI(screenX, screenY))
-            return false;
+        // Track pointer positions for pinch detection
+        if (pointer == 0) pointer0.set(screenX, screenY);
+        if (pointer == 1) {
+            pointer1.set(screenX, screenY);
+            pinching = true;
+            pinchStartDist = pointer0.dst(pointer1);
+            pinchStartZoom = camera.zoom;
+            return true; // consume: no boid spawn during pinch
+        }
+
+        if (isOverUI(screenX, screenY)) return false;
 
         if (button == Input.Buttons.RIGHT) {
             handleRemoval(screenX, screenY);
             return true;
         }
-        if (button != Input.Buttons.LEFT)
-            return false;
-
+        if (button != Input.Buttons.LEFT) return false;
         return handleInteraction(screenX, screenY);
     }
 
     @Override
-    public boolean touchDragged(int screenX, int screenY, int pointer) {
-        if (isOverUI(screenX, screenY))
-            return false;
+    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        if (pointer == 1) pinching = false;
+        if (pointer == 0 && !Gdx.input.isTouched(1)) pinching = false;
+        return false;
+    }
 
-        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+    @Override
+    public boolean touchDragged(int screenX, int screenY, int pointer) {
+        if (pointer == 0) pointer0.set(screenX, screenY);
+        if (pointer == 1) pointer1.set(screenX, screenY);
+
+        if (pinching && Gdx.input.isTouched(0) && Gdx.input.isTouched(1)) {
+            float currentDist = pointer0.dst(pointer1);
+            if (pinchStartDist > 0f) {
+                camera.zoom = Math.max(0.1f, Math.min(pinchStartZoom * (pinchStartDist / currentDist), 5f));
+            }
+            return true;
+        }
+
+        if (isOverUI(screenX, screenY)) return false;
+        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) || (pointer == 0 && Gdx.input.isTouched(0))) {
             handleInteraction(screenX, screenY);
             return true;
         }
@@ -113,64 +143,10 @@ public class InputHandler extends InputAdapter implements GestureDetector.Gestur
         tempVec.set(screenX, screenY, 0);
         camera.unproject(tempVec);
 
-        // Random slight velocity jump to spread them out
         float vx = (float) (Math.random() * 2 - 1);
         float vy = (float) (Math.random() * 2 - 1);
         Vec2 vel = new Vec2(vx, vy).setMagnitude(world.getConfig().maxSpeed * 0.5f);
 
         world.addBoid(new Vec2(tempVec.x, tempVec.y), vel);
-    }
-
-    // --- GestureListener Implementation ---
-    
-    private float initialZoom = 1f;
-
-    @Override
-    public boolean touchDown(float x, float y, int pointer, int button) {
-        initialZoom = camera.zoom;
-        return false; // Let InputAdapter handle actual interactions
-    }
-
-    @Override
-    public boolean tap(float x, float y, int count, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean longPress(float x, float y) {
-        if (isOverUI((int)x, (int)y)) return false;
-        handleRemoval((int)x, (int)y);
-        return true;
-    }
-
-    @Override
-    public boolean fling(float velocityX, float velocityY, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean pan(float x, float y, float deltaX, float deltaY) {
-        return false;
-    }
-
-    @Override
-    public boolean panStop(float x, float y, int pointer, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean zoom(float initialDistance, float distance) {
-        float ratio = initialDistance / distance;
-        camera.zoom = Math.max(0.1f, Math.min(initialZoom * ratio, 5f));
-        return true;
-    }
-
-    @Override
-    public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2, Vector2 pointer1, Vector2 pointer2) {
-        return false;
-    }
-
-    @Override
-    public void pinchStop() {
     }
 }

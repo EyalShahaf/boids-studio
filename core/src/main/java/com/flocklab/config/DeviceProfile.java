@@ -12,51 +12,39 @@ public enum DeviceProfile {
     MOBILE_SMALL;
 
     /**
-     * Attempts to heuristically determine the device profile.
+     * Heuristically determines the device profile from screen size.
+     *
+     * IMPORTANT: GWT/WebGL always reports getDensity() == 1.0, so we CANNOT
+     * divide by density there. Instead we rely on CSS pixel dimensions
+     * (which the browser exposes to GWT directly). A typical phone in portrait
+     * is 360-430 CSS px wide; a tablet is 600-900; a desktop is 900+.
      */
     public static DeviceProfile detect() {
-        // Allow manual overrides during testing (if set in a property, etc)
-        // For now, heuristic detection based on LibGDX environment
-
         ApplicationType type = Gdx.app.getType();
-        
-        // If it's a native desktop app, treat as desktop regardless of size
+
+        // Native desktop: always desktop regardless of window size
         if (type == ApplicationType.Desktop) {
             return DESKTOP;
         }
-        
-        // For WebGL or Android/iOS, try to guess based on resolution and density.
-        // We use logical pixels if available, or just fallback to simple thresholds.
-        float width = Gdx.graphics.getWidth();
+
+        float width  = Gdx.graphics.getWidth();
         float height = Gdx.graphics.getHeight();
-        
-        // Get the smaller dimension to represent the screen's baseline width
         float minDim = Math.min(width, height);
-        
-        // Typical mobile phones have a smaller logical or physical min dimension
-        // In GWT, usually width/height are the CSS pixel dimensions.
+
         if (type == ApplicationType.WebGL) {
-            if (minDim < 600) {
-                return MOBILE_SMALL;
-            } else if (minDim < 900) {
-                return TABLET;
-            }
+            // GWT reports CSS pixels directly. Density is always 1 – do NOT divide.
+            if (minDim < 600f) return MOBILE_SMALL;
+            if (minDim < 900f) return TABLET;
             return DESKTOP;
         }
 
-        // Default fallback for mobile platforms (Android/iOS)
-        if (type == ApplicationType.Android || type == ApplicationType.iOS) {
-            // Rough heuristic: density can vary widely, but assuming a simple threshold
-            float density = Gdx.graphics.getDensity();
-            float logicalMin = minDim / density;
-            
-            if (logicalMin < 600) {
-                return MOBILE_SMALL;
-            } else {
-                return TABLET; // Larger logical screen -> Tablet
-            }
-        }
-        
+        // Android / iOS: getDensity() is accurate on real native builds.
+        float density = Gdx.graphics.getDensity();
+        if (density <= 0f) density = 1.0f;
+        float logicalMin = minDim / density;
+
+        if (logicalMin < 600f) return MOBILE_SMALL;
+        if (logicalMin < 900f) return TABLET;
         return DESKTOP;
     }
 }
