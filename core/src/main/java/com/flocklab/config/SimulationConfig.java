@@ -45,7 +45,18 @@ public class SimulationConfig {
     public float worldWidth = 1280f;
     public float worldHeight = 720f;
 
+    public DeviceProfile deviceProfile = DeviceProfile.DESKTOP;
+
     public SimulationConfig() {
+    }
+
+    public SimulationConfig(DeviceProfile profile) {
+        this.deviceProfile = profile;
+        if (profile == DeviceProfile.MOBILE_SMALL) {
+            initialBoidCount = 200;
+        } else if (profile == DeviceProfile.TABLET) {
+            initialBoidCount = 350;
+        }
     }
 
     public void copyFrom(SimulationConfig other) {
@@ -81,9 +92,12 @@ public class SimulationConfig {
         this.initialBoidCount = other.initialBoidCount;
         this.worldWidth = other.worldWidth;
         this.worldHeight = other.worldHeight;
+        this.deviceProfile = other.deviceProfile;
     }
 
     public void resetToDefaults() {
-        this.copyFrom(new SimulationConfig());
+        // Keep the current profile
+        DeviceProfile currentProfile = this.deviceProfile;
+        this.copyFrom(new SimulationConfig(currentProfile));
     }
 }

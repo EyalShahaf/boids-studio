@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.flocklab.config.DeviceProfile;
 import com.flocklab.config.SimulationConfig;
 import com.flocklab.input.InputHandler;
 import com.flocklab.render.WorldRenderer;
@@ -39,9 +40,14 @@ public class FlockLabGame extends ApplicationAdapter {
 
     @Override
     public void create() {
-        SimulationConfig config = new SimulationConfig();
-        config.worldWidth = 1280f;
-        config.worldHeight = 720f;
+        DeviceProfile profile = DeviceProfile.detect();
+        SimulationConfig config = new SimulationConfig(profile);
+
+        // Initialise world dimensions to exact screen size (avoid default stretching)
+        config.worldWidth = Gdx.graphics.getWidth();
+        config.worldHeight = Gdx.graphics.getHeight();
+        if (config.worldWidth == 0) config.worldWidth = 1280f;
+        if (config.worldHeight == 0) config.worldHeight = 720f;
 
         world = new World(config);
 
@@ -51,16 +57,20 @@ public class FlockLabGame extends ApplicationAdapter {
         worldRenderer = new WorldRenderer(world, camera);
 
         // Setup UI
-        skin = SkinFactory.createSkin();
+        skin = SkinFactory.createSkin(profile);
         stage = new Stage(new ScreenViewport());
 
         Table root = new Table();
         root.setFillParent(true);
         stage.addActor(root);
 
-        // Simulation area (left/center)
+        // Simulation area (left/center/top)
         Table mainArea = new Table();
-        root.add(mainArea).expand().fill();
+        if (profile == DeviceProfile.DESKTOP) {
+            root.add(mainArea).expand().fill();
+        } else {
+            root.add(mainArea).expand().fill().row();
+        }
 
         // Footer in mainArea - use a spacer to push it to the bottom
         mainArea.add().expand().fill().row();
@@ -80,10 +90,12 @@ public class FlockLabGame extends ApplicationAdapter {
         controlPanel = new ControlPanel(root, stage, skin, world, this);
         statsOverlay = new StatsOverlay(stage, skin, world);
 
-        // Input distribution: UI first, then world interactions
+        // Input distribution: UI first, then gestures, then world interactions
         InputMultiplexer multiplexer = new InputMultiplexer();
+        InputHandler inputHandler = new InputHandler(world, camera, stage);
         multiplexer.addProcessor(stage);
-        multiplexer.addProcessor(new InputHandler(world, camera, stage));
+        multiplexer.addProcessor(new com.badlogic.gdx.input.GestureDetector(inputHandler));
+        multiplexer.addProcessor(inputHandler);
         Gdx.input.setInputProcessor(multiplexer);
 
         // Allow FPS higher than 60 if the hardware supports it (locks to refresh rate
@@ -121,7 +133,9 @@ public class FlockLabGame extends ApplicationAdapter {
 
     @Override
     public void resize(int width, int height) {
-        camera.setToOrtho(false, world.getConfig().worldWidth, world.getConfig().worldHeight);
+        world.getConfig().worldWidth = width;
+        world.getConfig().worldHeight = height;
+        camera.setToOrtho(false, width, height);
         stage.getViewport().update(width, height, true);
     }
 

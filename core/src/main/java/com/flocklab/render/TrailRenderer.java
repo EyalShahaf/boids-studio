@@ -2,6 +2,7 @@ package com.flocklab.render;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.flocklab.config.DeviceProfile;
 import com.flocklab.model.Boid;
 import com.flocklab.model.Vec2;
 
@@ -25,11 +26,6 @@ public class TrailRenderer {
     private static final int TRAIL_LENGTH_MEDIUM = 8;
     private static final int TRAIL_LENGTH_SHORT = 4;
 
-    /** Boid count thresholds for adaptive trail quality reduction. */
-    private static final int THRESHOLD_REDUCE = 600;
-    private static final int THRESHOLD_SHORT = 1000;
-    private static final int THRESHOLD_DISABLE = 1500;
-
     private int trailLength = TRAIL_LENGTH_NORMAL;
     public Color trailColor = new Color(0.2f, 0.7f, 0.9f, 0.3f);
     public boolean enabled = true;
@@ -37,25 +33,29 @@ public class TrailRenderer {
     /** ArrayDeque gives O(1) addLast/removeFirst with array cache locality. */
     private final Map<Integer, ArrayDeque<Vec2>> history = new HashMap<>();
 
-    public void updateAndRender(ShapeRenderer shapeRenderer, List<Boid> boids) {
+    public void updateAndRender(ShapeRenderer shapeRenderer, List<Boid> boids, DeviceProfile profile) {
         if (!enabled) return;
 
         int boidCount = boids.size();
+        
+        int threshDisable = profile == DeviceProfile.DESKTOP ? 1500 : 800;
+        int threshShort = profile == DeviceProfile.DESKTOP ? 1000 : 500;
+        int threshReduce = profile == DeviceProfile.DESKTOP ? 600 : 300;
 
         // Determine active trail length from current boid population
         int activeLength;
-        if (boidCount >= THRESHOLD_DISABLE) {
+        if (boidCount >= threshDisable) {
             return; // trails off entirely at very high counts
-        } else if (boidCount >= THRESHOLD_SHORT) {
+        } else if (boidCount >= threshShort) {
             activeLength = TRAIL_LENGTH_SHORT;
-        } else if (boidCount >= THRESHOLD_REDUCE) {
+        } else if (boidCount >= threshReduce) {
             activeLength = TRAIL_LENGTH_MEDIUM;
         } else {
             activeLength = trailLength;
         }
 
         // Render every Nth segment at medium-high counts to halve draw calls
-        int renderStep = (boidCount >= THRESHOLD_SHORT) ? 2 : 1;
+        int renderStep = (boidCount >= threshShort) ? 2 : 1;
 
         // Evict stale entries only when history has grown beyond the live boid set
         if (history.size() > boidCount + 10) {

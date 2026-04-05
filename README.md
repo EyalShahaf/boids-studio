@@ -140,15 +140,25 @@ One-click presets that instantly reconfigure all parameters for a specific emerg
 
 ---
 
-## 🎮 Mouse & Keyboard Reference
+## 🎮 Mouse & Touch Reference
 
 | Input | Action |
 |---|---|
-| Left Click / Drag | Use the currently selected placement tool |
-| Right Click | Remove the nearest obstacle |
-| Scroll Wheel | Zoom in / out (range: 0.1× – 5×) |
-| `<` button (panel edge) | Collapse the control panel |
-| `>` button (screen edge) | Expand the control panel |
+| Left Click / Tap / Drag | Use the currently selected placement tool |
+| Right Click / Long Press | Remove the nearest obstacle |
+| Scroll Wheel / Pinch | Zoom in / out (range: 0.1× – 5×) |
+| `<` or `v` button | Collapse the control panel |
+| `>` or `^` button | Expand the control panel |
+
+---
+
+## 📱 Responsive UX
+
+Boids Studio dynamically adapts its UI, controls, and physics targets depending on the detected device profile (`DESKTOP`, `TABLET`, or `MOBILE_SMALL`):
+- **Dynamic Viewport**: The simulation avoids stretching and maps exactly to the device's native aspect ratio.
+- **Adaptive Layout**: On desktop screens, the control panel docks to the right side. On mobile, it transforms into a dense toolbar and a collapsible bottom-sheet.
+- **Smart Touch**: Uses touch-native gestures including pinch-to-zoom and long-press object removal.
+- **Automated Performance**: Trail rendering features and default initial boid counts gracefully fall back for less capable mobile profiles to maintain high framerates.
 
 ---
 

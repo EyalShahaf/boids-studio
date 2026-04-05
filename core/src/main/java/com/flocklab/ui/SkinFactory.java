@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Slider.SliderStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle;
 import com.badlogic.gdx.scenes.scene2d.ui.Window.WindowStyle;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.flocklab.config.DeviceProfile;
 
 /**
  * Creates a simple programmatic skin for Scene2D UI without needing external
@@ -18,11 +19,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
  */
 public class SkinFactory {
 
-    public static Skin createSkin() {
+    public static Skin createSkin(DeviceProfile profile) {
         Skin skin = new Skin();
 
         // Basic font
         BitmapFont font = new BitmapFont();
+        if (profile != DeviceProfile.DESKTOP) {
+            font.getData().setScale(1.5f);
+        }
         skin.add("default", font);
 
         // Colors
@@ -38,9 +42,12 @@ public class SkinFactory {
         skin.add("button_up", createColorDrawable(buttonColor), com.badlogic.gdx.scenes.scene2d.utils.Drawable.class);
         skin.add("button_down", createColorDrawable(buttonDownColor),
                 com.badlogic.gdx.scenes.scene2d.utils.Drawable.class);
-        skin.add("slider_bg", createColorDrawable(sliderBgColor, 100, 4),
+        int sliderThickness = profile == DeviceProfile.DESKTOP ? 4 : 8;
+        int knobSize = profile == DeviceProfile.DESKTOP ? 12 : 24;
+
+        skin.add("slider_bg", createColorDrawable(sliderBgColor, 100, sliderThickness),
                 com.badlogic.gdx.scenes.scene2d.utils.Drawable.class);
-        skin.add("slider_knob", createColorDrawable(sliderKnobColor, 12, 12),
+        skin.add("slider_knob", createColorDrawable(sliderKnobColor, knobSize, knobSize),
                 com.badlogic.gdx.scenes.scene2d.utils.Drawable.class);
 
         // Styles

@@ -2,6 +2,7 @@ package com.flocklab.render;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.flocklab.config.DeviceProfile;
 import com.flocklab.config.SimulationConfig;
 import com.flocklab.model.Boid;
 import com.flocklab.model.Predator;
@@ -30,7 +31,7 @@ public class BoidRenderer {
     public void render(ShapeRenderer shapeRenderer, List<Boid> boids, List<Predator> predators,
             SimulationConfig config) {
         int boidCount = boids.size();
-        float lodScale = computeLodScale(boidCount);
+        float lodScale = computeLodScale(boidCount, config.deviceProfile);
         float boidSize = BOID_BASE_SIZE * lodScale;
         float predatorSize = PREDATOR_BASE_SIZE * lodScale;
 
@@ -113,11 +114,13 @@ public class BoidRenderer {
      * Returns a LOD scale factor based on boid count.
      * Both boid and predator base sizes are multiplied by this value so they
      * always stay proportional to each other.
+     * Scales up base size on mobile to maintain visual clarity on dense screens.
      */
-    private float computeLodScale(int boidCount) {
-        if (boidCount >= LOD_SMALL_THRESHOLD) return 0.5f;
-        if (boidCount >= LOD_MEDIUM_THRESHOLD) return 0.66f;
-        return 1.0f;
+    private float computeLodScale(int boidCount, DeviceProfile profile) {
+        float baseScale = profile == DeviceProfile.DESKTOP ? 1.0f : 2.0f;
+        if (boidCount >= LOD_SMALL_THRESHOLD) return 0.5f * baseScale;
+        if (boidCount >= LOD_MEDIUM_THRESHOLD) return 0.66f * baseScale;
+        return baseScale;
     }
 
     private void drawOrientedTriangle(ShapeRenderer sr, float x, float y, float angleRad, float size) {

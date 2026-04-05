@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.flocklab.AppVersion;
 import com.flocklab.FlockLabGame;
+import com.flocklab.config.DeviceProfile;
 import com.flocklab.config.Preset;
 import com.flocklab.config.SimulationConfig;
 import com.flocklab.sim.World;
@@ -50,17 +51,24 @@ public class ControlPanel {
         this.game = game;
         this.skin = skin;
 
-        // Container: panel on the left, toggle button flush against the screen's right edge
+        DeviceProfile profile = world.getConfig().deviceProfile;
+        final boolean isMobile = profile != DeviceProfile.DESKTOP;
+
+        // Container
         Table container = new Table();
-        panelCell = root.add(container).width(250).expandY().fillY();
+        if (isMobile) {
+            panelCell = root.add(container).height(270).expandX().fillX();
+        } else {
+            panelCell = root.add(container).width(250).expandY().fillY();
+        }
 
         panel = new Table(skin);
         panel.setBackground("panel_bg");
-        panel.pad(15);
-        buildPanel(panel);
+        panel.pad(isMobile ? 5 : 15);
+        buildPanel(panel, isMobile);
 
-        // Toggle button is placed AFTER the panel so it always sits at the screen edge
-        final TextButton toggleBtn = new TextButton("<", skin);
+        // Toggle button
+        final TextButton toggleBtn = new TextButton(isMobile ? "v" : "<", skin);
         toggleBtn.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -68,23 +76,34 @@ public class ControlPanel {
 
                 isRetracted = !isRetracted;
                 panel.setVisible(!isRetracted);
-                toggleBtn.setText(isRetracted ? ">" : "<");
-                // Collapse / restore the panel cell width so the toggle stays at screen edge
-                innerPanelCell.width(isRetracted ? 0 : 210).minWidth(0);
-                panelCell.width(isRetracted ? 40 : 250);
+                if (isMobile) {
+                    toggleBtn.setText(isRetracted ? "^" : "v");
+                    innerPanelCell.height(isRetracted ? 0 : 230).minHeight(0);
+                    panelCell.height(isRetracted ? 40 : 270);
+                } else {
+                    toggleBtn.setText(isRetracted ? ">" : "<");
+                    innerPanelCell.width(isRetracted ? 0 : 210).minWidth(0);
+                    panelCell.width(isRetracted ? 40 : 250);
+                }
                 root.invalidateHierarchy();
             }
         });
 
-        // Panel first (left), toggle last (right / screen edge)
-        innerPanelCell = container.add(panel).width(210).expandY().fillY();
-        container.add(toggleBtn).width(40).expandY().fillY();
+        if (isMobile) {
+            // toggle first (top), panel next (bottom)
+            container.add(toggleBtn).height(40).expandX().fillX().row();
+            innerPanelCell = container.add(panel).height(230).expandX().fillX();
+        } else {
+            // Panel first (left), toggle last (right / screen edge)
+            innerPanelCell = container.add(panel).width(210).expandY().fillY();
+            container.add(toggleBtn).width(40).expandY().fillY();
+        }
     }
 
-    private void buildPanel(Table panel) {
+    private void buildPanel(Table panel, boolean isMobile) {
         SimulationConfig cfg = world.getConfig();
 
-        panel.add(new Label("Boids Studio", skin)).padBottom(15).row();
+        if (!isMobile) panel.add(new Label("Boids Studio", skin)).padBottom(15).row();
 
         // --- Tools ---
         panel.add(new Label("--- Tools ---", skin)).padBottom(10).row();

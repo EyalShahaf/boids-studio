@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.flocklab.config.DeviceProfile;
 import com.flocklab.sim.World;
 
 /**
@@ -44,11 +45,14 @@ public class StatsOverlay {
         root.add(fpsLabel).left().row();
         root.add(boidLabel).left().row();
         root.add(predatorLabel).left().row();
-        root.add(new Label("--- Game Of Life ---", skin)).left().padTop(4).row();
-        root.add(boidsCreatedLabel).left().row();
-        root.add(boidsEatenLabel).left().row();
-        root.add(predatorsCreatedLabel).left().row();
-        root.add(predatorsDiedLabel).left().row();
+        
+        if (world.getConfig().deviceProfile == DeviceProfile.DESKTOP) {
+            root.add(new Label("--- Game Of Life ---", skin)).left().padTop(4).row();
+            root.add(boidsCreatedLabel).left().row();
+            root.add(boidsEatenLabel).left().row();
+            root.add(predatorsCreatedLabel).left().row();
+            root.add(predatorsDiedLabel).left().row();
+        }
 
         stage.addActor(root);
     }
@@ -60,10 +64,13 @@ public class StatsOverlay {
             fpsLabel.setText("FPS: " + Gdx.graphics.getFramesPerSecond());
             boidLabel.setText("Boids: " + world.getBoids().size());
             predatorLabel.setText("Predators: " + world.getPredators().size());
-            boidsCreatedLabel.setText("Created: " + world.getTotalBoidsCreated());
-            boidsEatenLabel.setText("Eaten: " + world.getTotalBoidsEaten());
-            predatorsCreatedLabel.setText("Pred. Created: " + world.getTotalPredatorsCreated());
-            predatorsDiedLabel.setText("Starved: " + world.getTotalPredatorsDiedOfHunger());
+            
+            if (world.getConfig().deviceProfile == DeviceProfile.DESKTOP) {
+                boidsCreatedLabel.setText("Created: " + world.getTotalBoidsCreated());
+                boidsEatenLabel.setText("Eaten: " + world.getTotalBoidsEaten());
+                predatorsCreatedLabel.setText("Pred. Created: " + world.getTotalPredatorsCreated());
+                predatorsDiedLabel.setText("Starved: " + world.getTotalPredatorsDiedOfHunger());
+            }
         }
     }
 }
