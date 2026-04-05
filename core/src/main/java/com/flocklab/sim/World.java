@@ -122,9 +122,33 @@ public class World {
                 spatialGrid.getNeighborsInto(predatorProxy, predatorRadius, neighborBuffer);
 
                 Vec2 baseChase = BoidRules.cohesionSquaredRadius(predatorProxy, neighborBuffer, predatorRadiusSq);
-                Vec2 chase = updatePredatorHungerAndSprint(predator, neighborBuffer, baseChase, deltaTime, deadPredators);
+                Vec2 steeringForce = updatePredatorHungerAndSprint(predator, neighborBuffer, baseChase, deltaTime, deadPredators);
 
-                predator.update(chase, deltaTime, config.predatorSprintSpeedMultiplier, worldWidth, worldHeight);
+                // Add obstacle avoidance so predators don't fly through walls
+                Vec2 obsAvoid = BoidRules.avoidObstacles(predatorProxy, obstacles, predatorRadius)
+                        .scale(config.obstacleAvoidanceWeight);
+                steeringForce = steeringForce.add(obsAvoid);
+
+                // Add predator-predator separation so they don't overlap into a single dot
+                float sepX = 0, sepY = 0;
+                int sepCount = 0;
+                for (int j = 0; j < predators.size(); j++) {
+                    if (i == j) continue;
+                    Predator other = predators.get(j);
+                    float dx = predator.getPosition().x() - other.getPosition().x();
+                    float dy = predator.getPosition().y() - other.getPosition().y();
+                    float d2 = dx * dx + dy * dy;
+                    if (d2 > 0 && d2 < predatorRadiusSq) {
+                        sepX += dx * (500f / d2);
+                        sepY += dy * (500f / d2);
+                        sepCount++;
+                    }
+                }
+                if (sepCount > 0) {
+                    steeringForce = steeringForce.add(new Vec2(sepX / sepCount, sepY / sepCount).scale(config.separationWeight * 1.5f));
+                }
+
+                predator.update(steeringForce, deltaTime, config.predatorSprintSpeedMultiplier, worldWidth, worldHeight);
                 handlePredatorEating(predator, boids, eatenBoidIds, deltaTime);
             }
 
