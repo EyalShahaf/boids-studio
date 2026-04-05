@@ -75,6 +75,9 @@ public class SkinFactory {
         windowStyle.background = skin.getDrawable("panel_bg");
         skin.add("default", windowStyle);
 
+        com.badlogic.gdx.scenes.scene2d.ui.ScrollPane.ScrollPaneStyle scrollPaneStyle = new com.badlogic.gdx.scenes.scene2d.ui.ScrollPane.ScrollPaneStyle();
+        skin.add("default", scrollPaneStyle);
+
         return skin;
     }
 
