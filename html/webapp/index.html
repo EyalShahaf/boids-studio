@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preload" href="html/logo.png" as="image">
+    <meta name="description"
+        content="Boids Studio — an interactive real-time flocking simulation with predators, stamina, and a live-editable ecosystem. Built with Java 21 and LibGDX, running in the browser via WebGL.">
     <title>Boids Studio</title>
     <style>
         * {
@@ -36,6 +39,19 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+        }
+
+        main {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Size the GWT preloader logo explicitly: the image file is 384x384 (2x for
+           retina), displayed at 192px. An unsized img here causes layout shift. */
+        .gdx-preloader img.logo {
+            width: 192px;
+            height: 192px;
         }
 
         #error-message {
@@ -70,7 +86,8 @@
 </head>
 
 <body>
-    <div id="embed-html">
+    <main>
+        <div id="embed-html">
         <div id="error-message">
             <h2>WebGL Not Found ❌</h2>
             <br>
@@ -84,6 +101,7 @@
             </ul>
         </div>
     </div>
+    </main>
     <script src="html/html.nocache.js"></script>
 </body>
 
